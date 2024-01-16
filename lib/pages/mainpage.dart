@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class Mainview extends StatefulWidget {
   const Mainview({Key? key}) : super(key: key);
@@ -17,26 +17,33 @@ class _MainviewState extends State<Mainview> {
   Future<void> _sendDataToApi() async {
     final String apiUrl = 'http://localhost:8080/api/v1/employees'; // Replace with your API endpoint
 
-    final Map<String, dynamic> data = {
-      'emailId': emailController.text,
-      'firstName': firstNameController.text,
-      'lastName': lastNameController.text,
-    };
+    final Dio dio = Dio();
 
-    final http.Response response = await http.post(
-      Uri.parse(apiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(data),
-    );
+    try {
+      final Response response = await dio.post(
+        apiUrl,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+        ),
+        data: {
+          'emailId': emailController.text,
+          'firstName': firstNameController.text,
+          'lastName': lastNameController.text,
+        },
+      );
 
-    if (response.statusCode == 201) {
-      // Data sent successfully, handle the response if needed
-      print('Data sent successfully');
-    } else {
-      // Handle errors here
-      print('Failed to send data. Status code: ${response.statusCode}');
+      if (response.statusCode == 201) {
+        // Data sent successfully, handle the response if needed
+        print('Data sent successfully');
+      } else {
+        // Handle errors here
+        print('Failed to send data. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle Dio errors here
+      print('Error sending data: $error');
     }
   }
 
