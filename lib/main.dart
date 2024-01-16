@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:testapp/pages/login.dart';
+import 'package:testapp/pages/mainpage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,10 +16,10 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         useMaterial3: true,
       ),
-      home: LoginPage()
+      home: Mainview()
     );
   }
 }

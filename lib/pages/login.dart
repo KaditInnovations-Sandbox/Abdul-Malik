@@ -61,19 +61,12 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            'assets/vector.png',
-            height: 689,
-          ),
-          SizedBox(width: 550,),
+
           Column(
             children: [
               SizedBox(height: 180,),
-              Image.asset(
-                'assets/mark.png',
-                height: 60,
-              ),
               SizedBox(height: 35.0),
               Container(
                 width: 350,
