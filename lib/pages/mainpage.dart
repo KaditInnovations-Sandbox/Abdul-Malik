@@ -1,5 +1,6 @@
 import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
+import 'package:testapp/pages/Admin.dart';
 import 'package:testapp/pages/Homepage.dart';
 import 'package:testapp/pages/login.dart';
 class MyHomePage extends StatefulWidget {
@@ -45,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Center(
                   child: Image.asset(
                     'assets/logo.png',
+                    height: MediaQuery.of(context).size.height * 0.12,
                   ),
                 ),
                 SizedBox(height: 20,)
@@ -101,15 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
 
                 Homepage(),
-                Container(
-                  color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Route Allocation',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
+
                 Container(
                   color: Colors.white,
                   child: const Center(
@@ -128,6 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
+                Admin(),
                 Container(
                   color: Colors.white,
                   child: const Center(

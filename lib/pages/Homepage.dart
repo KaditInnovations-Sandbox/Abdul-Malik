@@ -53,9 +53,9 @@ class _HomepageState extends State<Homepage> {
         
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 100),
+              padding: const EdgeInsets.only(top: 115),
               child: Container(
-                height: MediaQuery.of(context).size.height / 1.1,
+                height: MediaQuery.of(context).size.height / 1.2,
                 width: MediaQuery.of(context).size.width / 1.1,
                 child: FlutterMap(
                   options: MapOptions(
