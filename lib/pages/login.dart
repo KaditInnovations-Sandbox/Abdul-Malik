@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
         formData.fields.add(
           MapEntry('adminLogin', jsonEncode({
             'admin_email': username,
-            'password': password,
+            'admin_password': password,
           }),
 
           ),
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
         formData.fields.add(
           MapEntry('adminLogin', jsonEncode({
             'admin_phone': username,
-            'password': password,
+            'admin_password': password,
           })),
         );
 

@@ -105,6 +105,7 @@ class _NewPasswordState extends State<NewPassword> {
       if (response.statusCode == 200) {
         // API call successful
         print("Password Changes Successfully");
+        print("Response data: ${response.body}");
         Navigator.of(context).pop();
         // Handle the API response as needed
       } else {
