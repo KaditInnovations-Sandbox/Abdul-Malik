@@ -47,30 +47,19 @@ class _LoginPageState extends State<LoginPage> {
 
 
       if (isEmail(username)) {
-        formData.fields.add(
-          MapEntry('adminLogin', jsonEncode({
-            'admin_email': username,
-            'admin_password': password,
-          }),
+        formData.fields.addAll([
+          MapEntry('adminLogin.admin_email', username),
+          MapEntry('adminLogin.admin_password', password),
 
-          ),
-        );
-        formData.fields.add(
           MapEntry('key', 'email'),
-        );
-
+        ]);
       } else {
-        formData.fields.add(
-          MapEntry('adminLogin', jsonEncode({
-            'admin_phone': username,
-            'admin_password': password,
-          })),
-        );
-
-        formData.fields.add(
+        formData.fields.addAll([
+          MapEntry('adminLogin.admin_email', ''),
+          MapEntry('adminLogin.admin_phone', username),
+          MapEntry('adminLogin.admin_password', password),
           MapEntry('key', 'phone'),
-        );
-
+        ]);
       }
 
       print('FormData.fields: ${formData.fields}');
@@ -79,9 +68,6 @@ class _LoginPageState extends State<LoginPage> {
       final Response response = await dio.post(
         loginEndpoint,
         data: formData,
-        options: Options(
-          headers: {'Content-Type' : 'multipart/form-data'}
-        )
 
       );
 
@@ -91,12 +77,13 @@ class _LoginPageState extends State<LoginPage> {
         await _storage.write(key: 'username', value: username);
         await _storage.write(key: 'password', value: password);
       }
-      if (response.statusCode == 200) {
-        // Successful login
+      if (response.statusCode == 200 && response.data != null) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MyHomePage()),
+          MaterialPageRoute(builder: (context) => MyHomePage(name: '${response.data}',)),
         );
+        print('Login Succesful');
+        print('Username: ${response.data}');
       } else if (response.statusCode == 401) {
         print('Invalid credentials');
         showDialog(

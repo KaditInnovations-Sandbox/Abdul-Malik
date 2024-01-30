@@ -5,7 +5,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+  final String name;
+  const Homepage({super.key, required this.name});
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -21,7 +22,7 @@ class _HomepageState extends State<Homepage> {
             Positioned(
               top: MediaQuery.of(context).size.height / 130,
               child: Text(
-                "Welcome Admin!",
+                "Welcome ${widget.name} !",
                 style: TextStyle(fontSize: MediaQuery.of(context).size.width / 30),
               ),
             ),

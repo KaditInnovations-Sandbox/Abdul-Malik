@@ -4,7 +4,9 @@ import 'package:testapp/pages/Admin.dart';
 import 'package:testapp/pages/Homepage.dart';
 import 'package:testapp/pages/login.dart';
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, }) : super(key: key);
+  final String name;
+
+  const MyHomePage({Key? key, required this.name, }) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -68,21 +70,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: const Icon(Icons.route_rounded),
               ),
               SideMenuItem(
-                title: 'Driver Details',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.drive_eta),
-              ),
-              SideMenuItem(
-                title: 'Company',
+                title: 'Company Details',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
                 },
                 icon: const Icon(Icons.domain_rounded),
               ),
               SideMenuItem(
-                title: 'User',
+                title: 'Vehicles',
+                onTap: (index, _) {
+                  sideMenu.changePage(index);
+                },
+                icon: const Icon(Icons.drive_eta),
+              ),
+              SideMenuItem(
+                title: 'Drivers',
+                onTap: (index, _) {
+                  sideMenu.changePage(index);
+                },
+                icon: const Icon(Icons.account_circle_rounded),
+              ),
+              SideMenuItem(
+                title: 'Trip Admin',
                 onTap: (index, _) {
                   sideMenu.changePage(index);
                 },
@@ -94,6 +103,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   sideMenu.changePage(index);
                 },
                 icon: const Icon(Icons.file_copy_rounded),
+              ),
+              SideMenuItem(
+                title: 'Log Out',
+                onTap: (index, _) {
+
+                },
+                icon: const Icon(Icons.logout_sharp),
               )
             ],
           ),
@@ -102,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: pageController,
               children: [
 
-                Homepage(),
+                Homepage(name: widget.name,),
 
                 Container(
                   color: Colors.white,
@@ -122,30 +138,30 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
+                Container(
+                  color: Colors.white,
+                  child: const Center(
+                    child: Text(
+                      'Vehicles Details',
+                      style: TextStyle(fontSize: 35),
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.white,
+                  child: const Center(
+                    child: Text(
+                      'Drivers Page',
+                      style: TextStyle(fontSize: 35),
+                    ),
+                  ),
+                ),
                 Admin(),
                 Container(
                   color: Colors.white,
                   child: const Center(
                     child: Text(
-                      'User Details',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: const Center(
-                    child: Text(
                       'Report Page',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Only Icon',
                       style: TextStyle(fontSize: 35),
                     ),
                   ),
