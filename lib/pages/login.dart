@@ -50,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
         formData.fields.addAll([
           MapEntry('adminLogin.admin_email', username),
           MapEntry('adminLogin.admin_password', password),
-
           MapEntry('key', 'email'),
         ]);
       } else {
@@ -321,8 +320,8 @@ class _LoginPageState extends State<LoginPage> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
-                            onPrimary: Colors.white,
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
                             minimumSize: Size(
                               MediaQuery.of(context).size.width / 2.8 - 90,
                               50,
