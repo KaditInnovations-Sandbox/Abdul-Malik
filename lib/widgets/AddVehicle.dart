@@ -49,13 +49,13 @@ class _AddUserDialogState extends State<AddVehicleDialog> {
                       ),
                     ],
                   ),
-                  _buildInputField(label: 'Vehicle Capacity', hintText: 'Enter first name', controller: _firstNameController, validator: (value) {
+                  _buildInputField(label: 'Vehicle Capacity', hintText: 'BUS40', controller: _firstNameController, validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Vehicle Capacity  is required';
                     }
                     return null;
                   }),
-                  _buildInputField(label: 'Vehicle Number', hintText: 'Enter last name', controller: _lastNameController, validator: (value) {
+                  _buildInputField(label: 'Vehicle Number', hintText: 'SPR00000', controller: _lastNameController, validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Vehicle Number is required';
                     }
@@ -99,17 +99,15 @@ class _AddUserDialogState extends State<AddVehicleDialog> {
 
       // Handle response
       if (response.statusCode == 200) {
-        // Data sent successfully
+
         Navigator.of(context).pop();
-        // Optionally, show a success message
+
       } else {
-        // Error occurred while sending data
-        // Optionally, show an error message
+
         print('Error: ${response.statusCode} - ${response.statusMessage}');
       }
     } catch (e) {
-      // Handle error
-      // Optionally, show an error message
+
       print('Error: $e');
     }
   }

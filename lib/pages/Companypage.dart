@@ -43,7 +43,7 @@ class _CompanyState extends State<Company> {
         isLoading = true;
       });
 
-      final response = await Dio().get('http://localhost:8081/travelease/Admin');
+      final response = await Dio().get('http://localhost:8081/travelease/Company');
 
       List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
         return User(

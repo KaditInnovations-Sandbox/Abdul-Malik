@@ -3,32 +3,34 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:testapp/pages/Companydetails.dart';
+import 'package:testapp/widgets/AddVehicle.dart';
 import 'package:testapp/widgets/Adduser.dart';
+import 'package:testapp/widgets/Editvehicle.dart';
 import '../widgets/EmailforOtp.dart';
 import 'package:intl/intl.dart';
 
 class User {
-  String firstName;
-  String lastName;
-  String phoneNumber;
-  String role;
+  String vehiclecapacity;
+  String vehicleid;
+  String vehiclenumber;
+  String registeded;
 
   User({
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    required this.role,
+    required this.vehiclecapacity,
+    required this.vehiclenumber,
+    required this.registeded,
+    required this.vehicleid,
   });
 }
 
-class Admin extends StatefulWidget {
-  const Admin({Key? key});
+class Presentvehicle extends StatefulWidget {
+  const Presentvehicle({Key? key});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
 }
 
-class _UserManagementPageState extends State<Admin> {
+class _UserManagementPageState extends State<Presentvehicle> {
   List<User> users = [];
   bool isLoading = false;
   late String currentTime;
@@ -94,18 +96,18 @@ class _UserManagementPageState extends State<Admin> {
         isLoading = true;
       });
 
-      final response = await Dio().get('http://localhost:8081/travelease/Admin');
+      final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
 
       List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
         return User(
-          firstName: userData['admin_first_name'].toString(),
-          lastName: userData['admin_last_name'].toString(),
-          phoneNumber: userData['admin_phone'].toString(),
-          role: userData['admin_email'].toString(),
+          vehicleid: userData['vehicle_id'].toString(),
+          vehiclecapacity: userData['vehicle_capacity'].toString(),
+          vehiclenumber: userData['vehicle_number'].toString(),
+          registeded: userData['vehicle_registered'].toString(),
         );
       }).toList();
       print("Fetch Data Successful");
-      apiUsers.sort((a, b) => a.firstName.compareTo(b.firstName));
+      apiUsers.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
 
       setState(() {
         users = apiUsers;
@@ -119,9 +121,38 @@ class _UserManagementPageState extends State<Admin> {
     }
   }
 
-  void _editUser(User user) {}
+  void _editUser(User user) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditVehicleDialog(
+          vehicleId: user.vehicleid,
+          vehicleCapacity: user.vehiclecapacity,
+          vehicleNumber: user.vehiclenumber,
+        );
+      },
+    );
+  }
 
-  void _toggleAccess(User user) {}
+  void _toggleAccess(User user) async {
+    try {
+      final response = await Dio().delete(
+        'http://localhost:8081/travelease/Vehicle',
+        data: user.vehiclenumber,
+      );
+      if (response.statusCode == 200) {
+        // Handle success, such as updating UI or showing a message
+        print('Vehicle access removed successfully');
+      } else {
+        // Handle error or failure response
+        print('Failed to remove vehicle access');
+      }
+    } catch (error) {
+      // Handle Dio error
+      print('Error removing vehicle access: $error');
+    }
+  }
+
 
   void _filterUsers() {}
 
@@ -129,7 +160,7 @@ class _UserManagementPageState extends State<Admin> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddUserDialog();
+        return AddVehicleDialog();
       },
     );
   }
@@ -142,57 +173,6 @@ class _UserManagementPageState extends State<Admin> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: false,
-        backgroundColor: Colors.black,
-        title: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(currentDate, style: TextStyle(fontSize: 15, color: Colors.white)),
-                Text(
-                  currentTime,
-                  style: TextStyle(fontSize: 15, color: Colors.white),
-                ),
-              ],
-            ),
-          ],
-        ),
-        automaticallyImplyLeading: false,
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              SizedBox(width: 130,),
-              ElevatedButton(
-                onPressed: () => _addUser(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xffea6238),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text("Add"),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: () => _filterUsers(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xffea6238),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.file_copy_sharp),
-                    SizedBox(width: 3,),
-                    Text("Export")
-                  ],
-                ),
-              ),
-              const SizedBox(width: 26),
-            ],
-          ),
-        ],
-      ),
       body: isLoading
           ? LinearProgressIndicator(
         backgroundColor: Colors.grey[200],
@@ -212,7 +192,7 @@ class _UserManagementPageState extends State<Admin> {
                     height: 50,
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: "Enter Name, Email, phone, Role",
+                        hintText: "Enter Name, Email, phone, registeded",
                         hintStyle: TextStyle(color: Colors.grey),
                         fillColor: Colors.grey.withOpacity(0.5),
                         filled: true,
@@ -275,32 +255,20 @@ class _UserManagementPageState extends State<Admin> {
                       columns: [
                         DataColumn(
                           label: Text(
-                            'Admin ID',
+                            'Vehicle ID',
                             textAlign: TextAlign.center,
                           ),
                         ),
                         DataColumn(
                           label: Text(
-                            'Name',
+                            'Vehicle Capacity',
                             textAlign: TextAlign.center, // Center align the heading
                           ),
                         ),
 
                         DataColumn(
                           label: Text(
-                            'Email',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Phone Number',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Role',
+                            'Vehicle Number',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -326,7 +294,8 @@ class _UserManagementPageState extends State<Admin> {
                       rows: users.skip(_pageIndex * _rowsPerPage).take(_rowsPerPage).toList().asMap().entries.map((entry) {
                         final int index = entry.key + (_pageIndex * _rowsPerPage);
                         final User user = entry.value;
-                        final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
+                        final Color color =
+                        index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
                         return DataRow(
                           // selected: _selectedRows.contains(user),
                           // onSelectChanged: (isSelected) {
@@ -342,28 +311,24 @@ class _UserManagementPageState extends State<Admin> {
                           cells: [
                             DataCell(
                               Text(
-                                '${index + 1}',
+                                '${user.vehicleid}',
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
-                              Text("${user.firstName} ${user.lastName}"),
+                              Text("${user.vehiclecapacity}"),
                             ),
+
                             DataCell(
-                              Text(user.role, textAlign: TextAlign.center,),
-                            ),
-                            DataCell(
-                              Text(user.phoneNumber, textAlign: TextAlign.center,),
-                            ),
-                            DataCell(
-                              Text("Trip Admin", textAlign: TextAlign.center,),
+                              Text(user.vehiclenumber, textAlign: TextAlign.center,),
                             ),
                             DataCell(
                               Text(
-                                '20-02-24,15:26',
+                                DateFormat('MMM dd, yyyy').format(DateTime.parse(user.registeded)),
                                 textAlign: TextAlign.center,
                               ),
                             ),
+
                             DataCell(
                               IconButton(
                                 onPressed: () => _editUser(user),
@@ -376,6 +341,7 @@ class _UserManagementPageState extends State<Admin> {
                                 icon: Icon(Icons.remove_circle_outline, color: Color(0xffea6238)),
                               ),
                             ),
+
                           ],
                         );
                       }).toList(),
