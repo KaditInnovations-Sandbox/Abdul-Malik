@@ -1,176 +1,134 @@
-import 'package:easy_sidemenu/easy_sidemenu.dart';
 import 'package:flutter/material.dart';
 import 'package:testapp/pages/Admin.dart';
+import 'package:testapp/pages/Companypage.dart';
 import 'package:testapp/pages/Homepage.dart';
-import 'package:testapp/pages/login.dart';
+import 'package:testapp/pages/Vehiclepage.dart';
+
 class MyHomePage extends StatefulWidget {
   final String name;
 
-  const MyHomePage({Key? key, required this.name, }) : super(key: key);
+  const MyHomePage({Key? key, required this.name}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  PageController pageController = PageController();
-  SideMenuController sideMenu = SideMenuController();
+  int _selectedIndex = 0;
+  final PageController _pageController = PageController();
+  final List<String> _pageNames = [
+    'Home',
+    'Route Allocation',
+    'Vehicle Details',
+    'Driver Details',
+    'Company Details',
+    'Trip Admin',
+    'Report Page'
+  ];
 
-  @override
-  void initState() {
-    sideMenu.addListener((index) {
-      pageController.jumpToPage(index);
+  void _onPageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
-    super.initState();
+  }
+
+  void _onNavItemTapped(int index) {
+    _pageController.jumpToPage(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+      body: Column(
         children: [
-          SideMenu(
-            controller: sideMenu,
-            style: SideMenuStyle(
-              displayMode: SideMenuDisplayMode.auto,
-              hoverColor: Colors.orange[100],
-              selectedHoverColor: Colors.orange[100],
-              selectedColor: Colors.transparent,
-              selectedTitleTextStyle: const TextStyle(color: Colors.orange),
-              selectedIconColor: Colors.orange,
-
-            ),
-            title: Column(
-
+          Container(
+            color: Colors.white,
+            child: Row(
               children: [
-                SizedBox(height: 10,),
-                Center(
-                  child: Image.asset(
-                    'assets/logo.png',
-                    height: MediaQuery.of(context).size.height * 0.12,
-                  ),
+                SizedBox(width: 10),
+                Image.asset(
+                  "assets/logo.png",
+                  height: 30,
+                  fit: BoxFit.fitHeight,
                 ),
-                SizedBox(height: 20,)
+
+                _buildNavItem('Home', 0),
+                _buildNavSeparator(),
+                _buildNavItem('Driver', 1),
+                _buildNavSeparator(),
+                _buildNavItem('Vehicle', 2),
+                _buildNavSeparator(),
+                _buildNavItem('Company', 3),
+                _buildNavSeparator(),
+                _buildNavItem('Admin', 4),
+                Spacer(),
+                IconButton(onPressed: (){}, icon:Icon(Icons.logout,color: Color(0xffea6238),)),
+                SizedBox(width: 9),
               ],
             ),
-            items: [
-              SideMenuItem(
-                title: 'Home',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.home),
-              ),
-              SideMenuItem(
-                title: 'Route Allocation',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.route_rounded),
-              ),
-              SideMenuItem(
-                title: 'Company Details',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.domain_rounded),
-              ),
-              SideMenuItem(
-                title: 'Vehicles',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.drive_eta),
-              ),
-              SideMenuItem(
-                title: 'Drivers',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.account_circle_rounded),
-              ),
-              SideMenuItem(
-                title: 'Trip Admin',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.person),
-              ),
-              SideMenuItem(
-                title: 'Report',
-                onTap: (index, _) {
-                  sideMenu.changePage(index);
-                },
-                icon: const Icon(Icons.file_copy_rounded),
-              ),
-              SideMenuItem(
-                title: 'Log Out',
-                onTap: (index, _) {
-
-                },
-                icon: const Icon(Icons.logout_sharp),
-              )
-            ],
           ),
           Expanded(
             child: PageView(
-              controller: pageController,
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
               children: [
-
-                Homepage(name: widget.name,),
+                Homepage(name: widget.name),
 
                 Container(
                   color: Colors.white,
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'Driver Details',
                       style: TextStyle(fontSize: 35),
                     ),
                   ),
                 ),
-                Container(
-                  color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Company Details',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Vehicles Details',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Drivers Page',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
+                Vehicle(),
+                Company(),
                 Admin(),
-                Container(
-                  color: Colors.white,
-                  child: const Center(
-                    child: Text(
-                      'Report Page',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
+
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildNavItem(String title, int index) {
+    return InkWell(
+      onTap: () => _onNavItemTapped(index),
+      child: Container(
+
+        decoration: BoxDecoration(
+          color: _selectedIndex == index ? Colors.black : null,
+          border: _selectedIndex == index
+              ? Border(
+            top: BorderSide(
+              color: Color(0xffea6238),
+              width: 3,
+            ),
+          )
+              : null,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: _selectedIndex == index ? Colors.white : Colors.black,
+            fontWeight: _selectedIndex == index ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavSeparator() {
+    return Container(
+      width: 1,
+      height: 20,
+      color: Colors.grey,
+      margin: EdgeInsets.symmetric(horizontal: 10),
     );
   }
 }

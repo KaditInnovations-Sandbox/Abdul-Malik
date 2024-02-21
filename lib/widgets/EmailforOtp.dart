@@ -4,6 +4,8 @@ import 'package:testapp/widgets/Forget_Password.dart';
 import 'package:http/http.dart' as http;
 
 class Email extends StatefulWidget {
+  const Email({super.key});
+
   @override
   _EmailState createState() => _EmailState();
 }
@@ -21,7 +23,7 @@ class _EmailState extends State<Email> {
   }
 
   void _startTimer() {
-    const oneSec = const Duration(seconds: 1);
+    const oneSec = Duration(seconds: 1);
     _timer = Timer.periodic(
       oneSec,
           (Timer timer) {
@@ -80,7 +82,7 @@ class _EmailState extends State<Email> {
     // Example: https://pub.dev/packages/mailer
     // Return true if email is sent successfully, false otherwise
     // For now, we'll simulate success
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     return true;
   }
 
@@ -111,16 +113,16 @@ class _EmailState extends State<Email> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Enter Your Email'),
+      title: const Text('Enter Your Email'),
       content: Form(
         key: _emailFormKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.mail, size: 50, color: Colors.orange),
-            SizedBox(height: 10),
-            Text('Enter Your Email'),
-            SizedBox(height: 10),
+            const Icon(Icons.mail, size: 50, color: Colors.orange),
+            const SizedBox(height: 10),
+            const Text('Enter Your Email'),
+            const SizedBox(height: 10),
             TextFormField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
@@ -138,14 +140,14 @@ class _EmailState extends State<Email> {
                 return null;
               },
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: _sendOTP,
-                  child: Text('Send OTP'),
+                  child: const Text('Send OTP'),
                 ),
               ],
             ),
@@ -157,7 +159,7 @@ class _EmailState extends State<Email> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
       ],
     );

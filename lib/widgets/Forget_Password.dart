@@ -6,7 +6,7 @@ import 'package:testapp/widgets/Newpassword.dart';
 class ForgotPasswordDialog extends StatefulWidget {
   final String email;
 
-  ForgotPasswordDialog({required this.email});
+  const ForgotPasswordDialog({super.key, required this.email});
 
   @override
   _ForgotPasswordDialogState createState() => _ForgotPasswordDialogState(email: email);
@@ -27,7 +27,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   }
 
   void _startTimer() {
-    const oneSec = const Duration(seconds: 1);
+    const oneSec = Duration(seconds: 1);
     _timer = Timer.periodic(
       oneSec,
           (Timer timer) {
@@ -88,20 +88,20 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Enter the OTP'),
+      title: const Text('Enter the OTP'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.security, size: 50, color: Colors.orange),
-          SizedBox(height: 10),
+          const Icon(Icons.security, size: 50, color: Colors.orange),
+          const SizedBox(height: 10),
           Text('Check Your Mail $email'),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           TextField(
             controller: otpController,
             keyboardType: TextInputType.number,
             maxLength: 6,
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -117,14 +117,14 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                 },
                 child: Text('Resend OTP ($_seconds)'),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () async {
                   String enteredOtp = otpController.text;
                   await _sendOtpAndEmailToApi(email, enteredOtp);
 
                 },
-                child: Text('Verify OTP'),
+                child: const Text('Verify OTP'),
               ),
             ],
           ),
@@ -135,7 +135,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
       ],
     );

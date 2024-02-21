@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:testapp/pages/Companydetails.dart';
 import 'package:testapp/pages/login.dart';
 import 'package:testapp/pages/mainpage.dart';
 
@@ -13,14 +14,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'TEC Admin',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xffea6238)),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme()
       ),
-      home: LoginPage()
+      home: const MyHomePage(name: 'Abdul Malik',)
     );
   }
 }

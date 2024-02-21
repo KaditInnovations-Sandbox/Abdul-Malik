@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:testapp/pages/mainpage.dart';
 import 'package:testapp/widgets/EmailforOtp.dart';
-import 'package:testapp/widgets/Forget_Password.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -16,7 +16,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   bool isEmail(String input) {
     final emailRegex =
@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
     final String password = passwordController.text;
 
 
-    final String loginEndpoint = 'http://localhost:8081/travelease/Adminlogin';
+    const String loginEndpoint = 'http://localhost:8081/travelease/Adminlogin';
 
     try {
       FormData formData = FormData();
@@ -50,14 +50,13 @@ class _LoginPageState extends State<LoginPage> {
         formData.fields.addAll([
           MapEntry('adminLogin.admin_email', username),
           MapEntry('adminLogin.admin_password', password),
-          MapEntry('key', 'email'),
+          const MapEntry('key', 'email'),
         ]);
       } else {
         formData.fields.addAll([
-          MapEntry('adminLogin.admin_email', ''),
           MapEntry('adminLogin.admin_phone', username),
           MapEntry('adminLogin.admin_password', password),
-          MapEntry('key', 'phone'),
+          const MapEntry('key', 'phone'),
         ]);
       }
 
@@ -89,14 +88,14 @@ class _LoginPageState extends State<LoginPage> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Invalid Credentials'),
-              content: Text('Please check your username and password.'),
+              title: const Text('Invalid Credentials'),
+              content: const Text('Please check your username and password.'),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('OK'),
+                  child: const Text('OK'),
                 ),
               ],
             );
@@ -123,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -135,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
             Positioned(
               right: MediaQuery.of(context).size.width * 0,
               bottom: MediaQuery.of(context).size.height * 0,
-              child: Container(
+              child: SizedBox(
                 height: MediaQuery.of(context).size.height / 1.25,
                 child: Image.asset(
                   "assets/bus.png",
@@ -157,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.black.withOpacity(0.5),
                       spreadRadius: 1,
                       blurRadius: 15,
-                      offset: Offset(0, 3),
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
@@ -177,12 +176,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(
                           height: MediaQuery.of(context).size.height / 13),
-                      Text(
+                      const Text(
                         'Email or Phone Number',
                         style: TextStyle(
                             color: Colors.black, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       TextField(
                         controller: usernameController,
                         onEditingComplete: () {
@@ -199,31 +198,31 @@ class _LoginPageState extends State<LoginPage> {
                           filled: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 16),
-                      Text(
+                      const SizedBox(height: 16),
+                      const Text(
                         'Password',
                         style: TextStyle(
                             color: Colors.black, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       TextField(
                         controller: passwordController,
                         obscureText: !isPasswordVisible,
@@ -241,19 +240,19 @@ class _LoginPageState extends State<LoginPage> {
                           filled: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
@@ -273,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Row(
                         children: [
                           Checkbox(
@@ -286,28 +285,28 @@ class _LoginPageState extends State<LoginPage> {
                             checkColor: Colors.black,
                             activeColor: Colors.orange,
                           ),
-                          Text(
+                          const Text(
                             'Remember me',
                             style: TextStyle(color: Colors.orange),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           TextButton(
                             onPressed: () {
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return Email();
+                                  return const Email();
                                 },
                               );
                             },
-                            child: Text(
+                            child: const Text(
                               'Forgot Password?',
                               style: TextStyle(color: Colors.orange),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
@@ -327,7 +326,7 @@ class _LoginPageState extends State<LoginPage> {
                               50,
                             ),
                           ),
-                          child: Text('Login'),
+                          child: const Text('Login'),
                         ),
                       ),
                     ],

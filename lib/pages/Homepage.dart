@@ -1,74 +1,89 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:intl/intl.dart';
 
 class Homepage extends StatefulWidget {
   final String name;
-  const Homepage({super.key, required this.name});
+  const Homepage({Key? key, required this.name});
 
   @override
   State<Homepage> createState() => _HomepageState();
 }
 
 class _HomepageState extends State<Homepage> {
+  late String currentTime;
+  late String currentDate;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize current date and time
+    updateTime();
+    updateDate();
+    // Update date and time every second
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          updateTime();
+          updateDate();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer to prevent calling setState after dispose
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void updateTime() {
+    final now = DateTime.now();
+    currentTime = DateFormat('hh:mm a').format(now);
+  }
+
+  void updateDate() {
+    final now = DateTime.now();
+    currentDate = DateFormat('MMM dd, yyyy').format(now);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black87,
+      appBar: AppBar(
+        backgroundColor: Colors.black87,
+        title: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(currentDate,style: TextStyle(fontSize: 15,color: Colors.white),),
+                Text(
+                  currentTime,
+                  style: TextStyle(fontSize: 15,color: Colors.white),
+                ),
+              ],
+            ),
+            Spacer(),
+            IconButton(onPressed: (){print("refresh  button pressed");}, icon: Icon(Icons.refresh,color: Colors.white,))
+          ],
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+      ),
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            Positioned(
-              top: MediaQuery.of(context).size.height / 130,
-              child: Text(
-                "Welcome ${widget.name} !",
-                style: TextStyle(fontSize: MediaQuery.of(context).size.width / 30),
-              ),
-            ),
-            Positioned(
-              top: MediaQuery.of(context).size.height / 12,
-              child: Text(
-                "Track Your Vehicles Here:",
-                style: TextStyle(fontSize: MediaQuery.of(context).size.width / 70),
-              ),
-            ),
-            Positioned(
-              top: 15,
-              left: MediaQuery.of(context).size.width / 2.08,
-              child: Row(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width /4,
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "Search",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-        
-            ),
             Padding(
-              padding: const EdgeInsets.only(top: 115),
-              child: Container(
-                height: MediaQuery.of(context).size.height / 1.2,
-                width: MediaQuery.of(context).size.width / 1.1,
-                child: FlutterMap(
-                  options: MapOptions(
-                    zoom: 14,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      subdomains: ['a', 'b', 'c'],
-                    ),
-                  ],
-                ),
+              padding: const EdgeInsets.all(12.0),
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  width: MediaQuery.of(context).size.width * 2,
+                  child: Container()
               ),
             ),
           ],

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +5,7 @@ import 'package:http/http.dart' as http;
 class NewPassword extends StatefulWidget {
   final String email;
 
-  NewPassword({required this.email});
+  const NewPassword({super.key, required this.email});
 
   @override
   _NewPasswordState createState() => _NewPasswordState();
@@ -19,38 +18,38 @@ class _NewPasswordState extends State<NewPassword> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Enter Your New Password '),
+      title: const Text('Enter Your New Password '),
       content: Form(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.key, size: 50, color: Colors.orange),
-            SizedBox(height: 10),
-            Text('Enter Your New Password'),
-            SizedBox(height: 10),
+            const Icon(Icons.key, size: 50, color: Colors.orange),
+            const SizedBox(height: 10),
+            const Text('Enter Your New Password'),
+            const SizedBox(height: 10),
             TextFormField(
               controller: newPasswordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'New Password'),
+              decoration: const InputDecoration(labelText: 'New Password'),
               onEditingComplete: () {},
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
               controller: reEnterPasswordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'Re-enter Password'),
+              decoration: const InputDecoration(labelText: 'Re-enter Password'),
               onEditingComplete: () {},
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
                     _changePassword();
                   },
-                  child: Text('Change Password'),
+                  child: const Text('Change Password'),
                 ),
               ],
             ),
@@ -62,7 +61,7 @@ class _NewPasswordState extends State<NewPassword> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
       ],
     );
@@ -79,7 +78,7 @@ class _NewPasswordState extends State<NewPassword> {
       // Passwords don't match, show an error or alert the user
       // You can display an error message, e.g., using a SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Passwords do not match'),
           duration: Duration(seconds: 2),
         ),
