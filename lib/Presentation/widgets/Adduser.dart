@@ -13,12 +13,12 @@ class _AddUserDialogState extends State<AddUserDialog> {
   String? _selectedRole;
   final Dio _dio = Dio();
 
-  TextEditingController _firstNameController = TextEditingController();
-  TextEditingController _lastNameController = TextEditingController();
-  TextEditingController _phoneNumberController = TextEditingController();
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(Icons.close),
+                        icon: const Icon(Icons.close),
                       ),
                     ],
                   ),
@@ -91,21 +91,21 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     }
                     return null;
                   }),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _buildDropdown(label: 'Role', validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Role is required';
                     }
                     return null;
                   }),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _submitData();
                       }
                     },
-                    child: Text('Add'),
+                    child: const Text('Add'),
                   ),
                 ],
               ),
@@ -119,7 +119,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
   void _submitData() async {
     try {
       // Your API endpoint URL
-      final String apiUrl = 'http://localhost:8081/travelease/Admin';
+      const String apiUrl = 'http://localhost:8081/travelease/Admin';
 
       // Data to be sent to the API
       Map<String, dynamic> adminData = {
@@ -170,7 +170,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
             width: 120,
             child: Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               textAlign: TextAlign.center,
             ),
           ),
@@ -178,11 +178,11 @@ class _AddUserDialogState extends State<AddUserDialog> {
             child: TextFormField(
               controller: controller,
               obscureText: isObscure,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
               decoration: InputDecoration(
                 hintText: hintText,
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               ),
               validator: validator,
             ),
@@ -202,13 +202,13 @@ class _AddUserDialogState extends State<AddUserDialog> {
             width: 120,
             child: Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               textAlign: TextAlign.center,
             ),
           ),
           Expanded(
             child: DropdownButtonFormField<String>(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               ),
@@ -217,14 +217,14 @@ class _AddUserDialogState extends State<AddUserDialog> {
                   _selectedRole = value;
                 });
               },
-              items: [
+              items: const [
                 DropdownMenuItem(
-                  child: Text('TRIP_ADMIN', style: TextStyle(fontSize: 16)),
                   value: 'TRIP_ADMIN',
+                  child: Text('TRIP_ADMIN', style: TextStyle(fontSize: 16)),
                 ),
                 DropdownMenuItem(
-                  child: Text('SUPER_ADMIN', style: TextStyle(fontSize: 16)),
                   value: 'SUPER_ADMIN',
+                  child: Text('SUPER_ADMIN', style: TextStyle(fontSize: 16)),
                 ),
               ],
               validator: validator,

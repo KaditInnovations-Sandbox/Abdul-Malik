@@ -1,20 +1,21 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:testapp/pages/Removedvehicles.dart';
-import 'package:testapp/widgets/AddVehicle.dart';
-import 'package:testapp/pages/Passengersdetails.dart';
-import 'package:testapp/pages/Presentvehicles.dart';
-import 'package:testapp/pages/Routepage.dart';
 
-class Vehicle extends StatefulWidget {
-  const Vehicle({Key? key}) : super(key: key);
+import 'package:flutter/material.dart';
+import 'package:testapp/Constants/Colours.dart';
+import 'package:testapp/Presentation/screens/Presentvehicles.dart';
+import 'package:testapp/Presentation/screens/Removedvehicles.dart';
+import 'package:testapp/Presentation/widgets/AddVehicle.dart';
+import 'package:testapp/Utills/date_time_utils.dart';
+
+
+class VehilceScreen extends StatefulWidget {
+  const VehilceScreen({Key? key}) : super(key: key);
 
   @override
-  _VehicleState createState() => _VehicleState();
+  _VehilceScreenState createState() => _VehilceScreenState();
 }
 
-class _VehicleState extends State<Vehicle> {
+class _VehilceScreenState extends State<VehilceScreen> {
   late String currentTime;
   late String currentDate;
   late Timer _timer;
@@ -23,14 +24,16 @@ class _VehicleState extends State<Vehicle> {
   void initState() {
     super.initState();
     // Initialize current date and time
-    updateTime();
-    updateDate();
+    currentTime = DateTimeUtils.getCurrentTime();
+    currentDate = DateTimeUtils.getCurrentDate();
     // Update date and time every second
-    _timer = Timer.periodic(Duration(seconds: 0), (timer) {
-      setState(() {
-        updateTime();
-        updateDate();
-      });
+    _timer = Timer.periodic(const Duration(seconds: 0), (timer) {
+      if (mounted) {
+        setState(() {
+          currentTime = DateTimeUtils.getCurrentTime();
+          currentDate = DateTimeUtils.getCurrentDate();
+        });
+      }
     });
   }
 
@@ -41,21 +44,11 @@ class _VehicleState extends State<Vehicle> {
     super.dispose();
   }
 
-  void updateTime() {
-    final now = DateTime.now();
-    currentTime = DateFormat('hh:mm a').format(now);
-  }
-
-  void updateDate() {
-    final now = DateTime.now();
-    currentDate = DateFormat('MMM dd, yyyy').format(now);
-  }
-
   void _addUser() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddVehicleDialog();
+        return const AddVehicleDialog();
       },
     );
   }
@@ -67,16 +60,16 @@ class _VehicleState extends State<Vehicle> {
       child: Scaffold(
         appBar: AppBar(
           centerTitle: false,
-          backgroundColor: Colors.black,
+          backgroundColor: Colours.appBarBackground,
           title: Row(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(currentDate, style: TextStyle(fontSize: 15, color: Colors.white)),
+                  Text(currentDate, style: const TextStyle(fontSize: 15, color: Colours.textColor)),
                   Text(
-                    currentTime,
-                    style: TextStyle(fontSize: 15, color: Colors.white),
+                    "${currentTime}(SST)",
+                    style: const TextStyle(fontSize: 15, color: Colours.textColor),
                   ),
                 ],
               ),
@@ -87,12 +80,12 @@ class _VehicleState extends State<Vehicle> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                SizedBox(width: 130,),
+                const SizedBox(width: 130,),
                 ElevatedButton(
                   onPressed: () => _addUser(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xffea6238),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colours.buttonBackground,
+                    foregroundColor: Colours.textColor,
                   ),
                   child: const Text("Add"),
                 ),
@@ -100,8 +93,8 @@ class _VehicleState extends State<Vehicle> {
                 ElevatedButton(
                   onPressed: (){},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xffea6238),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colours.buttonBackground,
+                    foregroundColor: Colours.textColor,
                   ),
                   child: const Row(
                     children: [
@@ -122,14 +115,14 @@ class _VehicleState extends State<Vehicle> {
               builder: (context, constraints) {
                 return Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: Container(
+                  child: SizedBox(
                     width: constraints.maxWidth,
 
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.35),
-                      child: TabBar(
+                      child: const TabBar(
                         indicatorSize: TabBarIndicatorSize.tab,
-                        labelColor: Colors.white,
+                        labelColor: Colours.textColor,
                         indicator: BoxDecoration(
                           color: Colors.black,
                         ),
@@ -137,13 +130,13 @@ class _VehicleState extends State<Vehicle> {
                           Tab(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: Text('Active Vehicles'),
+                              child: Text('Active Colourss'),
                             ),
                           ),
                           Tab(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: Text('Inactive Vehicles'),
+                              child: Text('Inactive Colourss'),
                             ),
                           ),
                         ],
@@ -153,11 +146,11 @@ class _VehicleState extends State<Vehicle> {
                 );
               },
             ),
-            Expanded(
+            const Expanded(
               child: TabBarView(
                 children: [
-                  Presentvehicle(),
-                  Removedvehicle()
+                  PresentVehicleScreen(),
+                  RemovedVehicleScreen()
                 ],
               ),
             ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:testapp/pages/Admin.dart';
-import 'package:testapp/pages/Companypage.dart';
-import 'package:testapp/pages/Homepage.dart';
-import 'package:testapp/pages/Vehiclepage.dart';
+import 'package:testapp/Presentation/screens/Admin.dart';
+import 'package:testapp/Presentation/screens/Companypage.dart';
+import 'package:testapp/Presentation/screens/Driverpage.dart';
+import 'package:testapp/Presentation/screens/Homepage.dart';
+import 'package:testapp/Presentation/screens/Vehiclepage.dart';
 
 class MyHomePage extends StatefulWidget {
   final String name;
@@ -45,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
             color: Colors.white,
             child: Row(
               children: [
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Image.asset(
                   "assets/logo.png",
                   height: 30,
@@ -61,9 +62,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 _buildNavItem('Company', 3),
                 _buildNavSeparator(),
                 _buildNavItem('Admin', 4),
-                Spacer(),
-                IconButton(onPressed: (){}, icon:Icon(Icons.logout,color: Color(0xffea6238),)),
-                SizedBox(width: 9),
+                const Spacer(),
+                IconButton(onPressed: (){}, icon:const Icon(Icons.logout,color: Color(0xffea6238),)),
+                const SizedBox(width: 9),
               ],
             ),
           ),
@@ -73,19 +74,10 @@ class _MyHomePageState extends State<MyHomePage> {
               onPageChanged: _onPageChanged,
               children: [
                 Homepage(name: widget.name),
-
-                Container(
-                  color: Colors.white,
-                  child: Center(
-                    child: Text(
-                      'Driver Details',
-                      style: TextStyle(fontSize: 35),
-                    ),
-                  ),
-                ),
-                Vehicle(),
-                Company(),
-                Admin(),
+                const Driver(),
+                const VehilceScreen(),
+                const Company(),
+                const Admin(),
 
               ],
             ),
@@ -103,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
         decoration: BoxDecoration(
           color: _selectedIndex == index ? Colors.black : null,
           border: _selectedIndex == index
-              ? Border(
+              ? const Border(
             top: BorderSide(
               color: Color(0xffea6238),
               width: 3,
@@ -111,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
               : null,
         ),
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Text(
           title,
           style: TextStyle(
@@ -128,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
       width: 1,
       height: 20,
       color: Colors.grey,
-      margin: EdgeInsets.symmetric(horizontal: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 10),
     );
   }
 }

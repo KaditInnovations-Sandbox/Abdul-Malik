@@ -1,56 +1,53 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/pages/Companydetails.dart';
-import 'package:testapp/widgets/AddVehicle.dart';
-import 'package:testapp/widgets/Adduser.dart';
-import '../widgets/EmailforOtp.dart';
+import 'package:testapp/Presentation//widgets/Adduser.dart';
 import 'package:intl/intl.dart';
+import 'package:testapp/Utills/date_time_utils.dart';
 
 class User {
-  String vehiclecapacity;
-  String vehicleid;
-  String vehiclenumber;
-  String registeded;
+  String firstName;
+  String lastName;
+  String phoneNumber;
+  String role;
 
   User({
-    required this.vehiclecapacity,
-    required this.vehiclenumber,
-    required this.registeded,
-    required this.vehicleid,
+    required this.firstName,
+    required this.lastName,
+    required this.phoneNumber,
+    required this.role,
   });
 }
 
-class Removedvehicle extends StatefulWidget {
-  const Removedvehicle({Key? key});
+class Admin extends StatefulWidget {
+  const Admin({super.key, Key});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
 }
 
-class _UserManagementPageState extends State<Removedvehicle> {
+class _UserManagementPageState extends State<Admin> {
   List<User> users = [];
   bool isLoading = false;
   late String currentTime;
   late String currentDate;
-  bool _isSelectedAll = false;
-  List<User> _selectedRows = [];
+  final bool _isSelectedAll = false;
+  final List<User> _selectedRows = [];
   late Timer _timer;
-  int _rowsPerPage = 20;
+  final int _rowsPerPage = 20;
   int _pageIndex = 0;
 
   @override
   void initState() {
     super.initState();
     // Initialize current date and time
-    updateTime();
-    updateDate();
+    currentTime = DateTimeUtils.getCurrentTime();
+    currentDate = DateTimeUtils.getCurrentDate();
     // Update date and time every second
-    _timer = Timer.periodic(Duration(seconds: 0), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 0), (timer) {
       setState(() {
-        updateTime();
-        updateDate();
+        currentTime = DateTimeUtils.getCurrentTime();
+        currentDate = DateTimeUtils.getCurrentDate();
       });
     });
     _fetchData();
@@ -63,15 +60,6 @@ class _UserManagementPageState extends State<Removedvehicle> {
     super.dispose();
   }
 
-  void updateTime() {
-    final now = DateTime.now();
-    currentTime = DateFormat('hh:mm a').format(now);
-  }
-
-  void updateDate() {
-    final now = DateTime.now();
-    currentDate = DateFormat('MMM dd, yyyy').format(now);
-  }
 
   void _onPreviousPage() {
     setState(() {
@@ -95,18 +83,18 @@ class _UserManagementPageState extends State<Removedvehicle> {
         isLoading = true;
       });
 
-      final response = await Dio().get('http://localhost:8081/travelease/InactiveVehicle');
+      final response = await Dio().get('http://localhost:8081/travelease/Admin');
 
       List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
         return User(
-          vehicleid: userData['vehicle_id'].toString(),
-          vehiclecapacity: userData['vehicle_capacity'].toString(),
-          vehiclenumber: userData['vehicle_number'].toString(),
-          registeded: userData['vehicle_registered'].toString(),
+          firstName: userData['admin_first_name'].toString(),
+          lastName: userData['admin_last_name'].toString(),
+          phoneNumber: userData['admin_phone'].toString(),
+          role: userData['admin_email'].toString(),
         );
       }).toList();
       print("Fetch Data Successful");
-      apiUsers.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
+      apiUsers.sort((a, b) => a.firstName.compareTo(b.firstName));
 
       setState(() {
         users = apiUsers;
@@ -122,25 +110,7 @@ class _UserManagementPageState extends State<Removedvehicle> {
 
   void _editUser(User user) {}
 
-  void _toggleAccess(User user) async {
-    try {
-      final response = await Dio().put(
-        'http://localhost:8081/travelease/BindVehicle',
-        data: user.vehiclenumber,
-      );
-      if (response.statusCode == 200) {
-        // Handle success, such as updating UI or showing a message
-        print('Vehicle access removed successfully');
-      } else {
-        // Handle error or failure response
-        print('Failed to remove vehicle access');
-      }
-    } catch (error) {
-      // Handle Dio error
-      print('Error removing vehicle access: $error');
-    }
-  }
-
+  void _toggleAccess(User user) {}
 
   void _filterUsers() {}
 
@@ -148,7 +118,7 @@ class _UserManagementPageState extends State<Removedvehicle> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddVehicleDialog();
+        return const AddUserDialog();
       },
     );
   }
@@ -161,57 +131,57 @@ class _UserManagementPageState extends State<Removedvehicle> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   centerTitle: false,
-      //   backgroundColor: Colors.black,
-      //   title: Row(
-      //     children: [
-      //       Column(
-      //         crossAxisAlignment: CrossAxisAlignment.start,
-      //         children: [
-      //           Text(currentDate, style: TextStyle(fontSize: 15, color: Colors.white)),
-      //           Text(
-      //             currentTime,
-      //             style: TextStyle(fontSize: 15, color: Colors.white),
-      //           ),
-      //         ],
-      //       ),
-      //     ],
-      //   ),
-      //   automaticallyImplyLeading: false,
-      //   actions: [
-      //     Row(
-      //       mainAxisAlignment: MainAxisAlignment.end,
-      //       children: [
-      //         SizedBox(width: 130,),
-      //         ElevatedButton(
-      //           onPressed: () => _addUser(),
-      //           style: ElevatedButton.styleFrom(
-      //             backgroundColor: Color(0xffea6238),
-      //             foregroundColor: Colors.white,
-      //           ),
-      //           child: const Text("Add"),
-      //         ),
-      //         const SizedBox(width: 16),
-      //         ElevatedButton(
-      //           onPressed: () => _filterUsers(),
-      //           style: ElevatedButton.styleFrom(
-      //             backgroundColor: Color(0xffea6238),
-      //             foregroundColor: Colors.white,
-      //           ),
-      //           child: const Row(
-      //             children: [
-      //               Icon(Icons.file_copy_sharp),
-      //               SizedBox(width: 3,),
-      //               Text("Export")
-      //             ],
-      //           ),
-      //         ),
-      //         const SizedBox(width: 26),
-      //       ],
-      //     ),
-      //   ],
-      // ),
+      appBar: AppBar(
+        centerTitle: false,
+        backgroundColor: Colors.black,
+        title: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(currentDate, style: const TextStyle(fontSize: 15, color: Colors.white)),
+                Text(
+                  "${currentTime}(SST)",
+                  style: const TextStyle(fontSize: 15, color: Colors.white),
+                ),
+              ],
+            ),
+          ],
+        ),
+        automaticallyImplyLeading: false,
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const SizedBox(width: 130,),
+              ElevatedButton(
+                onPressed: () => _addUser(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffea6238),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text("Add"),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: () => _filterUsers(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffea6238),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.file_copy_sharp),
+                    SizedBox(width: 3,),
+                    Text("Export")
+                  ],
+                ),
+              ),
+              const SizedBox(width: 26),
+            ],
+          ),
+        ],
+      ),
       body: isLoading
           ? LinearProgressIndicator(
         backgroundColor: Colors.grey[200],
@@ -225,17 +195,17 @@ class _UserManagementPageState extends State<Removedvehicle> {
               color: Colors.white,
               child: Row(
                 children: [
-                  IconButton(onPressed: ()=>_refreshData(), icon: Icon(Icons.refresh)),
+                  IconButton(onPressed: ()=>_refreshData(), icon: const Icon(Icons.refresh)),
                   SizedBox(
                     width: 600,
                     height: 50,
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: "Enter Name, Email, phone, registeded",
-                        hintStyle: TextStyle(color: Colors.grey),
+                        hintText: "Enter Name, Email, phone, Role",
+                        hintStyle: const TextStyle(color: Colors.grey),
                         fillColor: Colors.grey.withOpacity(0.5),
                         filled: true,
-                        suffixIcon: Icon(Icons.search_rounded),
+                        suffixIcon: const Icon(Icons.search_rounded),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(40),
                           borderSide: const BorderSide(
@@ -245,22 +215,22 @@ class _UserManagementPageState extends State<Removedvehicle> {
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back_ios),
+                        icon: const Icon(Icons.arrow_back_ios),
                         onPressed: _pageIndex == 0 ? null : _onPreviousPage,
                       ),
                       Text('${_pageIndex + 1} of ${_calculateTotalPages()}'),
                       IconButton(
-                        icon: Icon(Icons.arrow_forward_ios),
+                        icon: const Icon(Icons.arrow_forward_ios),
                         onPressed: _pageIndex == (_calculateTotalPages() - 1) ? null : _onNextPage,
                       ),
                     ],
                   ),
-                  SizedBox(width: 15,)
+                  const SizedBox(width: 15,)
                 ],
               ),
             ),
@@ -278,7 +248,7 @@ class _UserManagementPageState extends State<Removedvehicle> {
                     child: DataTable(
                       columnSpacing: 5.0,
                       headingRowColor: MaterialStateProperty.resolveWith(
-                              (states) => Color(0xffea6238)
+                              (states) => const Color(0xffea6238)
                       ),
                       headingTextStyle: const TextStyle(
                         color: Colors.white,
@@ -291,29 +261,47 @@ class _UserManagementPageState extends State<Removedvehicle> {
                         color: Colors.black,
                         fontSize: 11,
                       ),
-                      columns: [
+                      columns: const [
                         DataColumn(
                           label: Text(
-                            'Vehicle ID',
+                            'Admin ID',
                             textAlign: TextAlign.center,
                           ),
                         ),
                         DataColumn(
                           label: Text(
-                            'Vehicle Capacity',
+                            'Name',
                             textAlign: TextAlign.center, // Center align the heading
                           ),
                         ),
 
                         DataColumn(
                           label: Text(
-                            'Vehicle Number',
+                            'Email',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Phone Number',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Role',
                             textAlign: TextAlign.center,
                           ),
                         ),
                         DataColumn(
                           label: Text(
                             'Created at',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Edit',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -327,8 +315,7 @@ class _UserManagementPageState extends State<Removedvehicle> {
                       rows: users.skip(_pageIndex * _rowsPerPage).take(_rowsPerPage).toList().asMap().entries.map((entry) {
                         final int index = entry.key + (_pageIndex * _rowsPerPage);
                         final User user = entry.value;
-                        final Color color =
-                        index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
+                        final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
                         return DataRow(
                           // selected: _selectedRows.contains(user),
                           // onSelectChanged: (isSelected) {
@@ -344,31 +331,40 @@ class _UserManagementPageState extends State<Removedvehicle> {
                           cells: [
                             DataCell(
                               Text(
-                                '${user.vehicleid}',
+                                '${index + 1}',
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
-                              Text("${user.vehiclecapacity}"),
-                            ),
-
-                            DataCell(
-                              Text(user.vehiclenumber, textAlign: TextAlign.center,),
+                              Text("${user.firstName} ${user.lastName}"),
                             ),
                             DataCell(
+                              Text(user.role, textAlign: TextAlign.center,),
+                            ),
+                            DataCell(
+                              Text(user.phoneNumber, textAlign: TextAlign.center,),
+                            ),
+                            const DataCell(
+                              Text("Trip Admin", textAlign: TextAlign.center,),
+                            ),
+                            const DataCell(
                               Text(
-                                DateFormat('MMM dd, yyyy').format(DateTime.parse(user.registeded)),
+                                '20-02-24,15:26',
                                 textAlign: TextAlign.center,
                               ),
                             ),
-
+                            DataCell(
+                              IconButton(
+                                onPressed: () => _editUser(user),
+                                icon: const Icon(Icons.edit, color: Color(0xffea6238)),
+                              ),
+                            ),
                             DataCell(
                               IconButton(
                                 onPressed: () => _toggleAccess(user),
-                                icon: Icon(Icons.add_circle_outline, color: Color(0xffea6238)),
+                                icon: const Icon(Icons.remove_circle_outline, color: Color(0xffea6238)),
                               ),
                             ),
-
                           ],
                         );
                       }).toList(),

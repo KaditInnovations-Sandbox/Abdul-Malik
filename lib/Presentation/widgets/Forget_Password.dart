@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:testapp/widgets/Newpassword.dart';
+import 'package:testapp/Presentation/widgets/Newpassword.dart';
 
 class ForgotPasswordDialog extends StatefulWidget {
   final String email;

@@ -1,21 +1,23 @@
+// lib/presentation/widgets/add_vehicle_dialog.dart
+
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:testapp/Constants/Colours.dart';
+import 'package:testapp/Data/Models/AddVehicle.dart';
+import 'package:testapp/Data/Repositories/Add_vehcle_repository.dart';
+
 
 class AddVehicleDialog extends StatefulWidget {
   const AddVehicleDialog({Key? key}) : super(key: key);
 
   @override
-  _AddUserDialogState createState() => _AddUserDialogState();
+  _AddVehicleDialogState createState() => _AddVehicleDialogState();
 }
 
-class _AddUserDialogState extends State<AddVehicleDialog> {
+class _AddVehicleDialogState extends State<AddVehicleDialog> {
   final _formKey = GlobalKey<FormState>();
-  String? _selectedRole;
-  final Dio _dio = Dio();
-
-  TextEditingController _firstNameController = TextEditingController();
-  TextEditingController _lastNameController = TextEditingController();
-
+  final TextEditingController _capacityController = TextEditingController();
+  final TextEditingController _numberController = TextEditingController();
+  final VehicleRepository _repository = VehicleRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -45,30 +47,34 @@ class _AddUserDialogState extends State<AddVehicleDialog> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(Icons.close),
+                        icon: const Icon(Icons.close),
                       ),
                     ],
                   ),
-                  _buildInputField(label: 'Vehicle Capacity', hintText: 'BUS40', controller: _firstNameController, validator: (value) {
+                  _buildInputField(label: 'Vehicle Capacity', hintText: 'BUS40', controller: _capacityController, validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Vehicle Capacity  is required';
+                      return 'Vehicle Capacity is required';
                     }
                     return null;
                   }),
-                  _buildInputField(label: 'Vehicle Number', hintText: 'SPR00000', controller: _lastNameController, validator: (value) {
+                  _buildInputField(label: 'Vehicle Number', hintText: 'SPR00000', controller: _numberController, validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Vehicle Number is required';
                     }
                     return null;
                   }),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _submitData();
                       }
                     },
-                    child: Text('Add'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colours.Addvehiclebutton,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Add'),
                   ),
                 ],
               ),
@@ -81,34 +87,11 @@ class _AddUserDialogState extends State<AddVehicleDialog> {
 
   void _submitData() async {
     try {
-      // Your API endpoint URL
-      final String apiUrl = 'http://localhost:8081/travelease/Vehicle';
-
-      // Data to be sent to the API
-      Map<String, dynamic> adminData = {
-        'vehicle_capacity': _firstNameController.text,
-        'vehicle_number': _lastNameController.text,
-      };
-
-
-      // Send POST request
-      final Response response = await _dio.post(
-        apiUrl,
-        data: adminData,
-      );
-
-      // Handle response
-      if (response.statusCode == 200) {
-
-        Navigator.of(context).pop();
-
-      } else {
-
-        print('Error: ${response.statusCode} - ${response.statusMessage}');
-      }
+      final Vehicle vehicle = Vehicle(capacity: _capacityController.text, number: _numberController.text);
+      await _repository.addVehicle(vehicle);
+      Navigator.of(context).pop();
     } catch (e) {
-
-      print('Error: $e');
+      print('Error submitting data: $e');
     }
   }
 
@@ -122,7 +105,7 @@ class _AddUserDialogState extends State<AddVehicleDialog> {
             width: 120,
             child: Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               textAlign: TextAlign.center,
             ),
           ),
@@ -130,11 +113,11 @@ class _AddUserDialogState extends State<AddVehicleDialog> {
             child: TextFormField(
               controller: controller,
               obscureText: isObscure,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
               decoration: InputDecoration(
                 hintText: hintText,
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               ),
               validator: validator,
             ),

@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:testapp/pages/mainpage.dart';
-import 'package:testapp/widgets/EmailforOtp.dart';
+import 'package:testapp/Presentation/widgets/EmailforOtp.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,87 +33,51 @@ class _LoginPageState extends State<LoginPage> {
 
   final Dio dio = Dio();
 
-
-  Future<void> attemptLogin(BuildContext context) async {
+  void _email() async {
     final String username = usernameController.text;
     final String password = passwordController.text;
 
-
-    const String loginEndpoint = 'http://localhost:8081/travelease/Adminlogin';
-
     try {
-      FormData formData = FormData();
+      const String apiUrl =
+          'http://localhost:8081/travelease/AdminEmaillogin';
 
-
-      if (isEmail(username)) {
-        formData.fields.addAll([
-          MapEntry('adminLogin.admin_email', username),
-          MapEntry('adminLogin.admin_password', password),
-          const MapEntry('key', 'email'),
-        ]);
-      } else {
-        formData.fields.addAll([
-          MapEntry('adminLogin.admin_phone', username),
-          MapEntry('adminLogin.admin_password', password),
-          const MapEntry('key', 'phone'),
-        ]);
-      }
-
-      print('FormData.fields: ${formData.fields}');
-      print('FormData.files: ${formData.files}');
+      Map<String, dynamic> adminData = {
+        "admin_email": username,
+        "admin_password": password,
+      };
 
       final Response response = await dio.post(
-        loginEndpoint,
-        data: formData,
-
+        apiUrl,
+        data: adminData,
       );
 
-
-      if (rememberMe) {
-        // Save credentials securely if Remember Me is checked
-        await _storage.write(key: 'username', value: username);
-        await _storage.write(key: 'password', value: password);
-      }
-      if (response.statusCode == 200 && response.data != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MyHomePage(name: '${response.data}',)),
-        );
-        print('Login Succesful');
-        print('Username: ${response.data}');
-      } else if (response.statusCode == 401) {
-        print('Invalid credentials');
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Invalid Credentials'),
-              content: const Text('Please check your username and password.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
+      if (response.statusCode == 200) {
+        Navigator.of(context).pop();
       } else {
-        // Handle other error cases
-        print('Error during login: ${response.statusCode}');
+        print('Error: ${response.statusCode} - ${response.statusMessage}');
       }
-    } catch (error) {
-      if (error is DioError) {
-        print('DioError: ${error.message}');
-        if (error.response != null) {
-          print('Response data: ${error.response?.data}');
-        }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> _phone() async {
+    try {
+      final Response response = await dio.post(
+        'http://localhost:8081/travelease/AdminPhonelogin',
+        data: {
+          "admin_phone": usernameController.text,
+          "admin_password": passwordController.text,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.of(context).pop();
+      } else {
+        print('Error: ${response.statusCode} - ${response.statusMessage}');
       }
-      else{
-        print('Error during login: $error');
-      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
@@ -187,8 +150,12 @@ class _LoginPageState extends State<LoginPage> {
                         onEditingComplete: () {
                           if (isEmail(usernameController.text) ||
                               isPhoneNumber(usernameController.text)) {
-
-                            attemptLogin(context);
+                            // Check if email or phone, then call the appropriate method
+                            if (isEmail(usernameController.text)) {
+                              _email();
+                            } else {
+                              _phone();
+                            }
                           } else {
                             print('Invalid email or phone number format');
                           }
@@ -229,8 +196,12 @@ class _LoginPageState extends State<LoginPage> {
                         onEditingComplete: () {
                           if (isEmail(usernameController.text) ||
                               isPhoneNumber(usernameController.text)) {
-
-                            attemptLogin(context);
+                            // Check if email or phone, then call the appropriate method
+                            if (isEmail(usernameController.text)) {
+                              _email();
+                            } else {
+                              _phone();
+                            }
                           } else {
                             print('Invalid email or phone number format');
                           }
@@ -312,8 +283,12 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () {
                             if (isEmail(usernameController.text) ||
                                 isPhoneNumber(usernameController.text)) {
-
-                              attemptLogin(context);
+                              // Check if email or phone, then call the appropriate method
+                              if (isEmail(usernameController.text)) {
+                                _email();
+                              } else {
+                                _phone();
+                              }
                             } else {
                               print('Invalid email or phone number format');
                             }

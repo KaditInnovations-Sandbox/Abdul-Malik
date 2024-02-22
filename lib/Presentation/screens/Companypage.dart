@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/pages/Companydetails.dart';
-import 'package:testapp/widgets/Adduser.dart';
+import 'package:testapp/Presentation/screens/Companydetails.dart';
+import 'package:testapp/Presentation/widgets/Adduser.dart';
 
 class User {
   String firstName;
@@ -19,7 +19,7 @@ class User {
 }
 
 class Company extends StatefulWidget {
-  const Company({Key? key});
+  const Company({super.key, Key});
 
   @override
   _CompanyState createState() => _CompanyState();
@@ -78,7 +78,7 @@ class _CompanyState extends State<Company> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddUserDialog();
+        return const AddUserDialog();
       },
     );
   }
@@ -106,7 +106,7 @@ class _CompanyState extends State<Company> {
         appBar: AppBar(
           centerTitle: false,
           backgroundColor: Colors.black54,
-          title: Text(
+          title: const Text(
             'Company Details',
             style: TextStyle(color: Colors.white),
           ),
@@ -123,7 +123,7 @@ class _CompanyState extends State<Company> {
                       hintText: "Search...",
                       fillColor: Colors.white,
                       filled: true,
-                      suffixIcon: Icon(Icons.search_rounded),
+                      suffixIcon: const Icon(Icons.search_rounded),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(40),
                         borderSide: const BorderSide(
@@ -133,7 +133,7 @@ class _CompanyState extends State<Company> {
                     ),
                   ),
                 ),
-                SizedBox(width: 130,),
+                const SizedBox(width: 130,),
                 ElevatedButton(
                   onPressed: () => _addUser(),
                   style: ElevatedButton.styleFrom(
@@ -181,7 +181,7 @@ class _CompanyState extends State<Company> {
                     child: DataTable(
                       columnSpacing: 5.0,
                       headingRowColor: MaterialStateProperty.resolveWith(
-                            (states) => Color(0xffea6238),
+                            (states) => const Color(0xffea6238),
                       ),
                       headingTextStyle: const TextStyle(
                         color: Colors.white,
@@ -243,7 +243,7 @@ class _CompanyState extends State<Company> {
                             DataCell(Flexible(
                                 child:TextButton(onPressed: () =>_viewCompanyDetails('${user.firstName} ${user.lastName}'),
                                     child: Text("${user.firstName} ${user.lastName}",
-                                      style: TextStyle(color: Colors.black,fontSize: 12),
+                                      style: const TextStyle(color: Colors.black,fontSize: 12),
                                       textAlign: TextAlign.center,))
                             )),
                             DataCell(Flexible(
@@ -255,13 +255,13 @@ class _CompanyState extends State<Company> {
                                 textAlign: TextAlign.center,
                               ),
                             )),
-                            DataCell(const Text("Trip Admin",
+                            const DataCell(Text("Trip Admin",
 
                               textAlign: TextAlign.center,)),
                             DataCell(Flexible(
                               child: IconButton(
                                 onPressed: () => _editUser(user),
-                                icon: Icon(Icons.edit, color: Colors.deepOrange),
+                                icon: const Icon(Icons.edit, color: Colors.deepOrange),
                               ),
                             )),
                             DataCell(Flexible(

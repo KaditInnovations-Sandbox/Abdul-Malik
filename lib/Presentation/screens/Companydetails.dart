@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:testapp/pages/Passengersdetails.dart';
-import 'package:testapp/pages/Routepage.dart';
+import 'package:testapp/Presentation/screens/Passengersdetails.dart';
+import 'package:testapp/Presentation/screens/Routepage.dart';
 
 class CompanyDetailsPage extends StatelessWidget {
   final String companyName;
@@ -15,14 +15,14 @@ class CompanyDetailsPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.black,
-          title: Text(
+          title: const Text(
             'Kadit Innovations',
             style: TextStyle(color: Colors.white),
           ),
           centerTitle: false,
           automaticallyImplyLeading: false, // Disable the default leading icon
           leading: IconButton(
-            icon: Icon(Icons.arrow_back,color: Colors.white,),
+            icon: const Icon(Icons.arrow_back,color: Colors.white,),
             onPressed: onBack, // Call the onBack callback to return to the CompanyPage
           ),
           actions: [
@@ -37,7 +37,7 @@ class CompanyDetailsPage extends StatelessWidget {
                       hintText: "Search...",
                       fillColor: Colors.white,
                       filled: true,
-                      suffixIcon: Icon(Icons.search_rounded),
+                      suffixIcon: const Icon(Icons.search_rounded),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(40),
                         borderSide: const BorderSide(
@@ -47,7 +47,7 @@ class CompanyDetailsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 150,),
+                const SizedBox(width: 150,),
                 ElevatedButton(
                   onPressed: () => {},
                   style: ElevatedButton.styleFrom(
@@ -86,7 +86,7 @@ class CompanyDetailsPage extends StatelessWidget {
                     color: Colors.grey.shade300,
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.35),
-                      child: TabBar(
+                      child: const TabBar(
                         indicatorSize: TabBarIndicatorSize.tab,
                         labelColor: Colors.white,
                         indicator: BoxDecoration(
@@ -112,7 +112,7 @@ class CompanyDetailsPage extends StatelessWidget {
                 );
               },
             ),
-            Expanded(
+            const Expanded(
               child: TabBarView(
                 children: [
                   Passengerpage(),

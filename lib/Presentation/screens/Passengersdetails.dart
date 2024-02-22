@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/pages/Companydetails.dart';
-import 'package:testapp/widgets/Adduser.dart';
+import 'package:testapp/Presentation/widgets/Adduser.dart';
 
 
 class User {
@@ -19,14 +18,14 @@ class User {
   });
 }
 
-class Routepage extends StatefulWidget {
-  const Routepage({Key? key});
+class Passengerpage extends StatefulWidget {
+  const Passengerpage({super.key, Key});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
 }
 
-class _UserManagementPageState extends State<Routepage> {
+class _UserManagementPageState extends State<Passengerpage> {
   List<User> users = [];
   bool isLoading = false;
 
@@ -77,11 +76,10 @@ class _UserManagementPageState extends State<Routepage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddUserDialog();
+        return const AddUserDialog();
       },
     );
   }
-
   
 
   @override
@@ -128,7 +126,7 @@ class _UserManagementPageState extends State<Routepage> {
                             columns: const [
                               DataColumn(
                                 label: Text(
-                                  'Company Name',
+                                  'Name',
                                   textAlign: TextAlign.center, // Center align the heading
                                 ),
                               ),
@@ -146,7 +144,13 @@ class _UserManagementPageState extends State<Routepage> {
                               ),
                               DataColumn(
                                 label: Text(
-                                  'POC',
+                                  'Stop ID',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Rooute ID',
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -183,13 +187,14 @@ class _UserManagementPageState extends State<Routepage> {
                                       textAlign: TextAlign.center,
                                     ),
                                   )),
-                                  DataCell(const Text("Trip Admin",
-
+                                  const DataCell(Text("Stop ID",
+                                    textAlign: TextAlign.center,)),
+                                  const DataCell(Text("Route ID",
                                     textAlign: TextAlign.center,)),
                                   DataCell(Flexible(
                                     child: IconButton(
                                       onPressed: () => _editUser(user),
-                                      icon: Icon(Icons.edit, color: Colors.deepOrange),
+                                      icon: const Icon(Icons.edit, color: Colors.deepOrange),
                                     ),
                                   )),
                                   DataCell(Flexible(

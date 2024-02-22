@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:testapp/pages/Companydetails.dart';
-import 'package:testapp/pages/login.dart';
-import 'package:testapp/pages/mainpage.dart';
+import 'package:testapp/Presentation/screens/mainpage.dart';
+import 'package:timezone/data/latest.dart' as tz;
+
+
+
 
 
 void main() {
+  tz.initializeTimeZones();
   runApp(const MyApp());
 }
 
@@ -17,11 +20,10 @@ class MyApp extends StatelessWidget {
       title: 'TEC Admin',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xffea6238)),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme()
       ),
-      home: const MyHomePage(name: 'Abdul Malik',)
+      home: const MyHomePage(name: 'Admin',)
     );
   }
 }

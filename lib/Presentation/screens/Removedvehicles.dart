@@ -1,57 +1,37 @@
 import 'dart:async';
-import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/pages/Companydetails.dart';
-import 'package:testapp/widgets/AddVehicle.dart';
-import 'package:testapp/widgets/Adduser.dart';
-import 'package:testapp/widgets/Editvehicle.dart';
-import '../widgets/EmailforOtp.dart';
 import 'package:intl/intl.dart';
+import 'package:testapp/Data/Models/Removedvehicle.dart';
+import 'package:testapp/Data/Repositories/Removed_vehilce_repository.dart';
 
-class User {
-  String vehiclecapacity;
-  String vehicleid;
-  String vehiclenumber;
-  String registeded;
-
-  User({
-    required this.vehiclecapacity,
-    required this.vehiclenumber,
-    required this.registeded,
-    required this.vehicleid,
-  });
-}
-
-class Presentvehicle extends StatefulWidget {
-  const Presentvehicle({Key? key});
+class RemovedVehicleScreen extends StatefulWidget {
+  const RemovedVehicleScreen({Key? key}) : super(key: key);
 
   @override
-  _UserManagementPageState createState() => _UserManagementPageState();
+  _RemovedVehicleScreenState createState() => _RemovedVehicleScreenState();
 }
 
-class _UserManagementPageState extends State<Presentvehicle> {
-  List<User> users = [];
-  bool isLoading = false;
-  late String currentTime;
-  late String currentDate;
-  bool _isSelectedAll = false;
-  List<User> _selectedRows = [];
+class _RemovedVehicleScreenState extends State<RemovedVehicleScreen> {
+  final RemovedVehicleRepository _repository = RemovedVehicleRepository();
+  List<RemovedVehicle> _vehicles = [];
+  bool _isLoading = false;
+  late String _currentTime;
+  late String _currentDate;
   late Timer _timer;
-  int _rowsPerPage = 20;
+  final int _rowsPerPage = 20;
   int _pageIndex = 0;
 
   @override
   void initState() {
     super.initState();
     // Initialize current date and time
-    updateTime();
-    updateDate();
+    _updateTime();
+    _updateDate();
     // Update date and time every second
-    _timer = Timer.periodic(Duration(seconds: 0), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
-        updateTime();
-        updateDate();
+        _updateTime();
+        _updateDate();
       });
     });
     _fetchData();
@@ -64,14 +44,14 @@ class _UserManagementPageState extends State<Presentvehicle> {
     super.dispose();
   }
 
-  void updateTime() {
+  void _updateTime() {
     final now = DateTime.now();
-    currentTime = DateFormat('hh:mm a').format(now);
+    _currentTime = DateFormat('hh:mm a').format(now);
   }
 
-  void updateDate() {
+  void _updateDate() {
     final now = DateTime.now();
-    currentDate = DateFormat('MMM dd, yyyy').format(now);
+    _currentDate = DateFormat('MMM dd, yyyy').format(now);
   }
 
   void _onPreviousPage() {
@@ -87,93 +67,32 @@ class _UserManagementPageState extends State<Presentvehicle> {
   }
 
   int _calculateTotalPages() {
-    return (users.length / _rowsPerPage).ceil();
+    return (_vehicles.length / _rowsPerPage).ceil();
   }
 
   Future<void> _fetchData() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
+      final vehicles = await _repository.fetchRemovedVehicles();
       setState(() {
-        isLoading = true;
-      });
-
-      final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
-
-      List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
-        return User(
-          vehicleid: userData['vehicle_id'].toString(),
-          vehiclecapacity: userData['vehicle_capacity'].toString(),
-          vehiclenumber: userData['vehicle_number'].toString(),
-          registeded: userData['vehicle_registered'].toString(),
-        );
-      }).toList();
-      print("Fetch Data Successful");
-      apiUsers.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
-
-      setState(() {
-        users = apiUsers;
+        _vehicles = vehicles;
       });
     } catch (error) {
       print('Error fetching data: $error');
     } finally {
       setState(() {
-        isLoading = false;
+        _isLoading = false;
       });
     }
-  }
-
-  void _editUser(User user) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return EditVehicleDialog(
-          vehicleId: user.vehicleid,
-          vehicleCapacity: user.vehiclecapacity,
-          vehicleNumber: user.vehiclenumber,
-        );
-      },
-    );
-  }
-
-  void _toggleAccess(User user) async {
-    try {
-      final response = await Dio().delete(
-        'http://localhost:8081/travelease/Vehicle',
-        data: user.vehiclenumber,
-      );
-      if (response.statusCode == 200) {
-        // Handle success, such as updating UI or showing a message
-        print('Vehicle access removed successfully');
-      } else {
-        // Handle error or failure response
-        print('Failed to remove vehicle access');
-      }
-    } catch (error) {
-      // Handle Dio error
-      print('Error removing vehicle access: $error');
-    }
-  }
-
-
-  void _filterUsers() {}
-
-  void _addUser() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AddVehicleDialog();
-      },
-    );
-  }
-
-  Future<void> _refreshData() async {
-    _fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: isLoading
+      body: _isLoading
           ? LinearProgressIndicator(
         backgroundColor: Colors.grey[200],
         valueColor: const AlwaysStoppedAnimation<Color>(Color(0xffea6238)),
@@ -186,17 +105,17 @@ class _UserManagementPageState extends State<Presentvehicle> {
               color: Colors.white,
               child: Row(
                 children: [
-                  IconButton(onPressed: ()=>_refreshData(), icon: Icon(Icons.refresh)),
+                  IconButton(onPressed: _fetchData, icon: const Icon(Icons.refresh)),
                   SizedBox(
                     width: 600,
                     height: 50,
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: "Enter Name, Email, phone, registeded",
-                        hintStyle: TextStyle(color: Colors.grey),
+                        hintStyle: const TextStyle(color: Colors.grey),
                         fillColor: Colors.grey.withOpacity(0.5),
                         filled: true,
-                        suffixIcon: Icon(Icons.search_rounded),
+                        suffixIcon: const Icon(Icons.search_rounded),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(40),
                           borderSide: const BorderSide(
@@ -206,22 +125,22 @@ class _UserManagementPageState extends State<Presentvehicle> {
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back_ios),
+                        icon: const Icon(Icons.arrow_back_ios),
                         onPressed: _pageIndex == 0 ? null : _onPreviousPage,
                       ),
                       Text('${_pageIndex + 1} of ${_calculateTotalPages()}'),
                       IconButton(
-                        icon: Icon(Icons.arrow_forward_ios),
+                        icon: const Icon(Icons.arrow_forward_ios),
                         onPressed: _pageIndex == (_calculateTotalPages() - 1) ? null : _onNextPage,
                       ),
                     ],
                   ),
-                  SizedBox(width: 15,)
+                  const SizedBox(width: 15,)
                 ],
               ),
             ),
@@ -239,7 +158,7 @@ class _UserManagementPageState extends State<Presentvehicle> {
                     child: DataTable(
                       columnSpacing: 5.0,
                       headingRowColor: MaterialStateProperty.resolveWith(
-                              (states) => Color(0xffea6238)
+                              (states) => const Color(0xffea6238)
                       ),
                       headingTextStyle: const TextStyle(
                         color: Colors.white,
@@ -252,7 +171,7 @@ class _UserManagementPageState extends State<Presentvehicle> {
                         color: Colors.black,
                         fontSize: 11,
                       ),
-                      columns: [
+                      columns: const [
                         DataColumn(
                           label: Text(
                             'Vehicle ID',
@@ -280,68 +199,42 @@ class _UserManagementPageState extends State<Presentvehicle> {
                         ),
                         DataColumn(
                           label: Text(
-                            'Edit',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
                             'Remove Access',
                             textAlign: TextAlign.center,
                           ),
                         ),
                       ],
-                      rows: users.skip(_pageIndex * _rowsPerPage).take(_rowsPerPage).toList().asMap().entries.map((entry) {
+                      rows: _vehicles.skip(_pageIndex * _rowsPerPage).take(_rowsPerPage).toList().asMap().entries.map((entry) {
                         final int index = entry.key + (_pageIndex * _rowsPerPage);
-                        final User user = entry.value;
-                        final Color color =
-                        index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
+                        final RemovedVehicle vehicle = entry.value;
+                        final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
                         return DataRow(
-                          // selected: _selectedRows.contains(user),
-                          // onSelectChanged: (isSelected) {
-                          //   setState(() {
-                          //     if (isSelected ?? false) {
-                          //       _selectedRows.add(user);
-                          //     } else {
-                          //       _selectedRows.remove(user);
-                          //     }
-                          //   });
-                          // },
                           color: MaterialStateProperty.all(color),
                           cells: [
                             DataCell(
                               Text(
-                                '${user.vehicleid}',
+                                vehicle.vehicleId,
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
-                              Text("${user.vehiclecapacity}"),
+                              Text(vehicle.vehicleCapacity),
                             ),
-
                             DataCell(
-                              Text(user.vehiclenumber, textAlign: TextAlign.center,),
+                              Text(vehicle.vehicleNumber, textAlign: TextAlign.center,),
                             ),
                             DataCell(
                               Text(
-                                DateFormat('MMM dd, yyyy').format(DateTime.parse(user.registeded)),
+                                DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
                                 textAlign: TextAlign.center,
                               ),
                             ),
-
                             DataCell(
                               IconButton(
-                                onPressed: () => _editUser(user),
-                                icon: Icon(Icons.edit, color: Color(0xffea6238)),
+                                onPressed: () => _repository.removeVehicleAccess(vehicle.vehicleNumber),
+                                icon: const Icon(Icons.add_circle_outline, color: Color(0xffea6238)),
                               ),
                             ),
-                            DataCell(
-                              IconButton(
-                                onPressed: () => _toggleAccess(user),
-                                icon: Icon(Icons.remove_circle_outline, color: Color(0xffea6238)),
-                              ),
-                            ),
-
                           ],
                         );
                       }).toList(),
