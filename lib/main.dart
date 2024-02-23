@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:testapp/Presentation/screens/mainpage.dart';
+import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Presentation/screens/mainpage.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 
@@ -20,10 +21,11 @@ class MyApp extends StatelessWidget {
       title: 'TEC Admin',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xffea6438)),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme()
       ),
-      home: const MyHomePage(name: 'Admin',)
+      home: const MyHomePage()
     );
   }
 }

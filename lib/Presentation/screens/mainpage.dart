@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:testapp/Presentation/screens/Admin.dart';
-import 'package:testapp/Presentation/screens/Companypage.dart';
-import 'package:testapp/Presentation/screens/Driverpage.dart';
-import 'package:testapp/Presentation/screens/Homepage.dart';
-import 'package:testapp/Presentation/screens/Vehiclepage.dart';
+import 'package:tec_admin/Presentation/screens/Admin.dart';
+import 'package:tec_admin/Presentation/screens/Companypage.dart';
+import 'package:tec_admin/Presentation/screens/Driverpage.dart';
+import 'package:tec_admin/Presentation/screens/Homepage.dart';
+import 'package:tec_admin/Presentation/screens/Vehiclepage.dart';
 
 class MyHomePage extends StatefulWidget {
-  final String name;
 
-  const MyHomePage({Key? key, required this.name}) : super(key: key);
+  const MyHomePage({Key? key, }) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -73,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: _pageController,
               onPageChanged: _onPageChanged,
               children: [
-                Homepage(name: widget.name),
+                Homepage(),
                 const Driver(),
                 const VehilceScreen(),
                 const Company(),

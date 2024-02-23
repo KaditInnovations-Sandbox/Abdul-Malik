@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:testapp/Presentation/screens/Passengersdetails.dart';
-import 'package:testapp/Presentation/screens/Routepage.dart';
+import 'package:tec_admin/Presentation/screens/Passengersdetails.dart';
+import 'package:tec_admin/Presentation/screens/Routepage.dart';
 
 class CompanyDetailsPage extends StatelessWidget {
   final String companyName;

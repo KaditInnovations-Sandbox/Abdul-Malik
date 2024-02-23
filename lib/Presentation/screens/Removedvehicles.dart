@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:testapp/Data/Models/Removedvehicle.dart';
-import 'package:testapp/Data/Repositories/Removed_vehilce_repository.dart';
+import 'package:tec_admin/Data/Models/Removedvehicle.dart';
+import 'package:tec_admin/Data/Repositories/Removed_vehilce_repository.dart';
 
 class RemovedVehicleScreen extends StatefulWidget {
   const RemovedVehicleScreen({Key? key}) : super(key: key);

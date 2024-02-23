@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:testapp/Constants/Colours.dart';
-import 'package:testapp/Presentation/screens/Presentvehicles.dart';
-import 'package:testapp/Presentation/screens/Removedvehicles.dart';
-import 'package:testapp/Presentation/widgets/AddVehicle.dart';
-import 'package:testapp/Utills/date_time_utils.dart';
+import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Presentation/screens/Presentvehicles.dart';
+import 'package:tec_admin/Presentation/screens/Removedvehicles.dart';
+import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
+import 'package:tec_admin/Utills/date_time_utils.dart';
 
 
 class VehilceScreen extends StatefulWidget {
@@ -68,7 +68,7 @@ class _VehilceScreenState extends State<VehilceScreen> {
                 children: [
                   Text(currentDate, style: const TextStyle(fontSize: 15, color: Colours.textColor)),
                   Text(
-                    "${currentTime}(SST)",
+                    "${currentTime}(SGT)",
                     style: const TextStyle(fontSize: 15, color: Colours.textColor),
                   ),
                 ],

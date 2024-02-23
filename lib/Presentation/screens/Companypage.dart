@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/Presentation/screens/Companydetails.dart';
-import 'package:testapp/Presentation/widgets/Adduser.dart';
+import 'package:tec_admin/Presentation/screens/Companydetails.dart';
+import 'package:tec_admin/Presentation/widgets/Adduser.dart';
 
 class User {
   String firstName;

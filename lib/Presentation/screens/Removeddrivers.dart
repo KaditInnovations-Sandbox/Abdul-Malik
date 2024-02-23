@@ -10,14 +10,14 @@ import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 
 import 'package:dio/dio.dart';
 
-class Sevilaidrivers extends StatefulWidget {
-  const Sevilaidrivers({Key? key}) : super(key: key);
+class Removeddrivers extends StatefulWidget {
+  const Removeddrivers({Key? key}) : super(key: key);
 
   @override
   _VehicleManagementPageState createState() => _VehicleManagementPageState();
 }
 
-class _VehicleManagementPageState extends State<Sevilaidrivers> {
+class _VehicleManagementPageState extends State<Removeddrivers> {
   List<PresentVehicle> vehicles = [];
   bool isLoading = false;
   late String currentTime;
@@ -325,15 +325,10 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
                             textAlign: TextAlign.center,
                           ),
                         ),
+
                         DataColumn(
                           label: Text(
-                            'Edit',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Remove Access',
+                            'Grand Access',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -400,16 +395,11 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
                       //           textAlign: TextAlign.center,
                       //         ),
                       //       ),
-                      //       DataCell(
-                      //         IconButton(
-                      //           onPressed: () => _editVehicle(vehicle),
-                      //           icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
-                      //         ),
-                      //       ),
+                      //
                       //       DataCell(
                       //         IconButton(
                       //           onPressed: () => _toggleAccess(vehicle),
-                      //           icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
+                      //           icon: const Icon(Icons.add_circle_outline, color: Colours.Presentvehiclebutton),
                       //         ),
                       //       ),
                       //     ],
@@ -464,14 +454,8 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
                             ),
                             DataCell(
                               IconButton(
-                                onPressed: () => {},
-                                icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
-                              ),
-                            ),
-                            DataCell(
-                              IconButton(
                                 onPressed: () {},
-                                icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
+                                icon: const Icon(Icons.add_circle_outline, color: Colours.Presentvehiclebutton),
                               ),
                             ),
                           ],

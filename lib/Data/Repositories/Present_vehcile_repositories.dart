@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:testapp/Data/Models/Presentvehicle.dart';
+import 'package:tec_admin/Data/Models/Presentvehicle.dart';
 
 
 class PresentVehicleRepository {

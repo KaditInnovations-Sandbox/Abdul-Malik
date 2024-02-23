@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:testapp/Constants/Colours.dart';
-import 'package:testapp/Data/Models/Presentvehicle.dart';
-import 'package:testapp/Presentation/widgets/AddVehicle.dart';
-import 'package:testapp/Presentation/widgets/Editvehicle.dart';
+import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Data/Models/Presentvehicle.dart';
+import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
+import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 
 import 'package:dio/dio.dart';
 

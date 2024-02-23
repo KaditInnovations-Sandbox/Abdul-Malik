@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/Presentation//widgets/Adduser.dart';
+import 'package:tec_admin/Presentation//widgets/Adduser.dart';
 import 'package:intl/intl.dart';
-import 'package:testapp/Utills/date_time_utils.dart';
+import 'package:tec_admin/Utills/date_time_utils.dart';
 
 class User {
   String firstName;
@@ -141,7 +141,7 @@ class _UserManagementPageState extends State<Admin> {
               children: [
                 Text(currentDate, style: const TextStyle(fontSize: 15, color: Colors.white)),
                 Text(
-                  "${currentTime}(SST)",
+                  "${currentTime}(SGT)",
                   style: const TextStyle(fontSize: 15, color: Colors.white),
                 ),
               ],

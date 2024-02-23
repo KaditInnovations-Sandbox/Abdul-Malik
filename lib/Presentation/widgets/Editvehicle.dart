@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/Constants/Colours.dart';
+import 'package:tec_admin/Constants/Colours.dart';
 
 class EditVehicleDialog extends StatefulWidget {
   final String vehicleId;
@@ -66,66 +66,82 @@ class _EditVehicleDialogState extends State<EditVehicleDialog> {
         borderRadius: BorderRadius.circular(20.0),
       ),
       elevation: 0.0,
-      backgroundColor: Colours.textColor,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
+      backgroundColor: Colors.transparent,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.3,
+            height: MediaQuery.of(context).size.height * 0.44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-
-                      TextField(
-                        controller: _capacityController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.close),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(height: 10),
                 Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-
-                      TextField(
-                        controller: _numberController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            const Text("Vehicle Capacity :"),
+                            const SizedBox(width: 18),
+                            Expanded(
+                              child: TextField(
+                                controller: _capacityController,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            const Text("Vehicle Number   :"),
+                            const SizedBox(width: 18),
+                            Expanded(
+                              child: TextField(
+                                controller: _numberController,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+
+                          onPressed: () {
+                            _editUser();
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colours.orange,
+                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          ),
+                          child: const Text('Update',style: TextStyle(color: Colours.white),),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _editUser();
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
-            Positioned(
-              top: 5,
-              right: 5,
-              child: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(Icons.close),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

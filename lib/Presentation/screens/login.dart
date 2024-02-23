@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:testapp/Presentation/widgets/EmailforOtp.dart';
+import 'package:tec_admin/Presentation/widgets/EmailforOtp.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
