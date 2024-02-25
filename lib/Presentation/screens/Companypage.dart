@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Presentation/screens/Companydetails.dart';
-import 'package:tec_admin/Presentation/widgets/Adduser.dart';
+import 'package:tec_admin/Presentation/widgets/Addadmin.dart';
+
+import '../../Utills/date_time_utils.dart';
 
 class User {
   String firstName;
@@ -30,20 +33,52 @@ class _CompanyState extends State<Company> {
   bool isLoading = false;
   bool showCompanyDetailsPage = false;
   late String companyName;
+  late String currentTime;
+  late String currentDate;
+  late Timer _timer;
+  final int _rowsPerPage = 20;
+  int _pageIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    currentTime = DateTimeUtils.getCurrentTime();
+    currentDate = DateTimeUtils.getCurrentDate();
+    // Update date and time every second
+    _timer = Timer.periodic(const Duration(seconds: 0), (timer) {
+      setState(() {
+        currentTime = DateTimeUtils.getCurrentTime();
+        currentDate = DateTimeUtils.getCurrentDate();
+      });
+    });
     _fetchData();
   }
 
+  void _onPreviousPage() {
+    setState(() {
+      _pageIndex = (_pageIndex - 1).clamp(0, (_calculateTotalPages() - 1));
+    });
+  }
+
+  void _onNextPage() {
+    setState(() {
+      _pageIndex = (_pageIndex + 1).clamp(0, (_calculateTotalPages() - 1));
+    });
+  }
+
+  int _calculateTotalPages() {
+    return (users.length / _rowsPerPage).ceil();
+  }
+  Future<void> _refreshData() async {
+    _fetchData();
+  }
   Future<void> _fetchData() async {
     try {
       setState(() {
         isLoading = true;
       });
 
-      final response = await Dio().get('http://localhost:8081/travelease/Company');
+      final response = await Dio().get('http://localhost:8081/travelease/Admin');
 
       List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
         return User(
@@ -78,13 +113,14 @@ class _CompanyState extends State<Company> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddUserDialog();
+        return const AddAdminDialog();
       },
     );
   }
 
   void _goBack() {
     setState(() {
+      _timer.cancel();
       showCompanyDetailsPage = false;
     });
   }
@@ -102,42 +138,34 @@ class _CompanyState extends State<Company> {
       return CompanyDetailsPage(companyName: companyName, onBack: _goBack);
     } else {
       return Scaffold(
-        backgroundColor: Colors.black87,
+        backgroundColor: Colours.white,
         appBar: AppBar(
           centerTitle: false,
-          backgroundColor: Colors.black54,
-          title: const Text(
-            'Company Details',
-            style: TextStyle(color: Colors.white),
+          backgroundColor: Colors.black,
+          title: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(currentDate, style: const TextStyle(fontSize: 15, color: Colors.white)),
+                  Text(
+                    "${currentTime}(SGT)",
+                    style: const TextStyle(fontSize: 15, color: Colors.white),
+                  ),
+                ],
+              ),
+            ],
           ),
           automaticallyImplyLeading: false,
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                SizedBox(
-                  width: 350,
-                  height: 50,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Search...",
-                      fillColor: Colors.white,
-                      filled: true,
-                      suffixIcon: const Icon(Icons.search_rounded),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40),
-                        borderSide: const BorderSide(
-                          color: Colors.transparent,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
                 const SizedBox(width: 130,),
                 ElevatedButton(
                   onPressed: () => _addUser(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepOrange.shade400,
+                    backgroundColor: const Color(0xffea6238),
                     foregroundColor: Colors.white,
                   ),
                   child: const Text("Add"),
@@ -146,13 +174,14 @@ class _CompanyState extends State<Company> {
                 ElevatedButton(
                   onPressed: () => _filterUsers(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: const Color(0xffea6238),
+                    foregroundColor: Colors.white,
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.filter_alt),
-                      Text("Filter")
+                      Icon(Icons.file_copy_sharp),
+                      SizedBox(width: 3,),
+                      Text("Export")
                     ],
                   ),
                 ),
@@ -168,6 +197,52 @@ class _CompanyState extends State<Company> {
         )
             : Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: Container(
+                color: Colors.white,
+                child: Row(
+                  children: [
+                    IconButton(onPressed: ()=>_refreshData(), icon: const Icon(Icons.refresh)),
+                    SizedBox(
+                      width: 600,
+                      height: 50,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "Enter Name, Email, phone, Role",
+                          hintStyle: const TextStyle(color: Colors.grey),
+                          fillColor: Colors.grey.withOpacity(0.5),
+                          filled: true,
+                          suffixIcon: const Icon(Icons.search_rounded),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(40),
+                            borderSide: const BorderSide(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios),
+                          onPressed: _pageIndex == 0 ? null : _onPreviousPage,
+                        ),
+                        Text('${_pageIndex + 1} of ${_calculateTotalPages()}'),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios),
+                          onPressed: _pageIndex == (_calculateTotalPages() - 1) ? null : _onNextPage,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 15,)
+                  ],
+                ),
+              ),
+            ),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),

@@ -71,12 +71,12 @@ class _MyHomePageState extends State<MyHomePage> {
             child: PageView(
               controller: _pageController,
               onPageChanged: _onPageChanged,
-              children: [
+              children: const [
                 Homepage(),
-                const Driver(),
-                const VehilceScreen(),
-                const Company(),
-                const Admin(),
+                Driver(),
+                VehilceScreen(),
+                Company(),
+                Adminpage()
 
               ],
             ),

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_admin/Presentation/widgets/Adduser.dart';
+import 'package:tec_admin/Presentation/widgets/Addadmin.dart';
 
 
 class User {
@@ -76,7 +76,7 @@ class _UserManagementPageState extends State<Routepage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddUserDialog();
+        return const AddAdminDialog();
       },
     );
   }

@@ -1,38 +1,28 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:tec_admin/Presentation//widgets/Adduser.dart';
+import 'package:tec_admin/Data/Models/Admin.dart';
+import 'package:tec_admin/Data/Repositories/Admin_repo.dart';
+import 'package:tec_admin/Presentation//widgets/Addadmin.dart';
 import 'package:intl/intl.dart';
 import 'package:tec_admin/Utills/date_time_utils.dart';
 
-class User {
-  String firstName;
-  String lastName;
-  String phoneNumber;
-  String role;
 
-  User({
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    required this.role,
-  });
-}
 
-class Admin extends StatefulWidget {
-  const Admin({super.key, Key});
+class Adminpage extends StatefulWidget {
+  const Adminpage({super.key, Key});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
 }
 
-class _UserManagementPageState extends State<Admin> {
-  List<User> users = [];
+class _UserManagementPageState extends State<Adminpage> {
+  List<Admin> users = [];
   bool isLoading = false;
   late String currentTime;
   late String currentDate;
   final bool _isSelectedAll = false;
-  final List<User> _selectedRows = [];
+  final List<Admin> _selectedRows = [];
   late Timer _timer;
   final int _rowsPerPage = 20;
   int _pageIndex = 0;
@@ -78,47 +68,33 @@ class _UserManagementPageState extends State<Admin> {
   }
 
   Future<void> _fetchData() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
+    final repository = AdminRepository();
+    List<Admin> fetchedUsers = await repository.fetchAdmins();
 
-      final response = await Dio().get('http://localhost:8081/travelease/Admin');
+    setState(() {
+      users = fetchedUsers;
+      isLoading = false;
+    });
 
-      List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
-        return User(
-          firstName: userData['admin_first_name'].toString(),
-          lastName: userData['admin_last_name'].toString(),
-          phoneNumber: userData['admin_phone'].toString(),
-          role: userData['admin_email'].toString(),
-        );
-      }).toList();
-      print("Fetch Data Successful");
-      apiUsers.sort((a, b) => a.firstName.compareTo(b.firstName));
-
-      setState(() {
-        users = apiUsers;
-      });
-    } catch (error) {
-      print('Error fetching data: $error');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
   }
 
-  void _editUser(User user) {}
+  void _editUser(Admin admin) {
 
-  void _toggleAccess(User user) {}
+  }
 
-  void _filterUsers() {}
+  void _toggleAccess(Admin admin) {
+
+  }
+
+  void _filterUsers() {
+
+  }
 
   void _addUser() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddUserDialog();
+        return const AddAdminDialog();
       },
     );
   }
@@ -314,7 +290,7 @@ class _UserManagementPageState extends State<Admin> {
                       ],
                       rows: users.skip(_pageIndex * _rowsPerPage).take(_rowsPerPage).toList().asMap().entries.map((entry) {
                         final int index = entry.key + (_pageIndex * _rowsPerPage);
-                        final User user = entry.value;
+                        final Admin admin = entry.value;
                         final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
                         return DataRow(
                           // selected: _selectedRows.contains(user),
@@ -336,13 +312,13 @@ class _UserManagementPageState extends State<Admin> {
                               ),
                             ),
                             DataCell(
-                              Text("${user.firstName} ${user.lastName}"),
+                              Text("${admin.firstName} ${admin.lastName}"),
                             ),
                             DataCell(
-                              Text(user.role, textAlign: TextAlign.center,),
+                              Text(admin.role, textAlign: TextAlign.center,),
                             ),
                             DataCell(
-                              Text(user.phoneNumber, textAlign: TextAlign.center,),
+                              Text(admin.phoneNumber, textAlign: TextAlign.center,),
                             ),
                             const DataCell(
                               Text("Trip Admin", textAlign: TextAlign.center,),
@@ -355,13 +331,13 @@ class _UserManagementPageState extends State<Admin> {
                             ),
                             DataCell(
                               IconButton(
-                                onPressed: () => _editUser(user),
+                                onPressed: () => _editUser(admin),
                                 icon: const Icon(Icons.edit, color: Color(0xffea6238)),
                               ),
                             ),
                             DataCell(
                               IconButton(
-                                onPressed: () => _toggleAccess(user),
+                                onPressed: () => _toggleAccess(admin),
                                 icon: const Icon(Icons.remove_circle_outline, color: Color(0xffea6238)),
                               ),
                             ),
