@@ -1,19 +1,23 @@
 import 'package:dio/dio.dart';
 import 'package:tec_admin/Data/Models/Presentvehicle.dart';
 
-
 class PresentVehicleRepository {
   Future<List<PresentVehicle>> fetchVehicles() async {
     try {
       final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
-      return (response.data as List<dynamic>).map((vehicleData) {
+      List<PresentVehicle> vehicles = (response.data as List<dynamic>).map((vehicleData) {
         return PresentVehicle(
           vehicleid: vehicleData['vehicle_id'].toString(),
           vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
           vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registeded: vehicleData['vehicle_registered'].toString(),
+          registered: vehicleData['vehicle_registered'].toString(),
         );
       }).toList();
+
+      // Sort the list by vehicle id in ascending order
+      vehicles.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
+
+      return vehicles;
     } catch (error) {
       print('Error fetching data: $error');
       return [];

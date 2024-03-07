@@ -1,31 +1,23 @@
-import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:tec_admin/Constants/Colours.dart';
-import 'package:tec_admin/Data/Models/Dummydata.dart';
+import 'package:tec_admin/Data/Models/Admin.dart';
 import 'package:tec_admin/Data/Models/Presentvehicle.dart';
-import 'package:tec_admin/Data/Repositories/Dummy.dart';
-import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
+import 'package:tec_admin/Data/Repositories/Admin_repo.dart';
+import 'package:tec_admin/Data/Repositories/Present_vehcile_repositories.dart';
+import 'package:tec_admin/Presentation/widgets/Add_passenger.dart';
 import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 
-import 'package:dio/dio.dart';
-
-class Contractdrivers extends StatefulWidget {
-  const Contractdrivers({Key? key}) : super(key: key);
+class Shedule extends StatefulWidget {
+  const Shedule({super.key});
 
   @override
-  _VehicleManagementPageState createState() => _VehicleManagementPageState();
+  State<Shedule> createState() => _SheduleState();
 }
 
-class _VehicleManagementPageState extends State<Contractdrivers> {
-  List<PresentVehicle> vehicles = [];
+class _SheduleState extends State<Shedule> {
+  List<Admin> users = [];
   bool isLoading = false;
-  late String currentTime;
-  late String currentDate;
-  final bool _isSelectedAll = false;
-  final List<PresentVehicle> _selectedRows = [];
-  List<Dummydata> dummyDrivers = [];
-  late Timer _timer;
   final int _rowsPerPage = 10;
   int _pageIndex = 0;
   final TextEditingController _searchController = TextEditingController();
@@ -34,51 +26,17 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
   void initState() {
     super.initState();
     // Initialize current date and time
-    updateTime();
-    updateDate();
-    _fetchDummyData();
-    // Update date and time every second
-    _timer = Timer.periodic(const Duration(seconds: 0), (timer) {
-      setState(() {
-        updateTime();
-        updateDate();
-      });
-    });
     _fetchData();
     _searchController.addListener(() {
       _filterVehicles(_searchController.text);
     });
   }
 
-  Future<void> _fetchDummyData() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    // Fetch dummy drivers using the repository
-    dummyDrivers = await DummydataRepository.getDummyDrivers(); // Adjust the method according to your repository implementation
-
-    setState(() {
-      isLoading = false;
-    });
-  }
-
   @override
   void dispose() {
     // Cancel the timer in the dispose method
-    _timer.cancel();
     _searchController.dispose();
     super.dispose();
-  }
-
-  void updateTime() {
-    final now = DateTime.now();
-    currentTime = DateFormat('hh:mm a').format(now);
-  }
-
-  void updateDate() {
-    final now = DateTime.now();
-    currentDate = DateFormat('MMM dd, yyyy').format(now);
   }
 
   void _onPreviousPage() {
@@ -94,38 +52,36 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
   }
 
   int _calculateTotalPages() {
-    return (vehicles.length / _rowsPerPage).ceil();
+    return (users.length / _rowsPerPage).ceil();
   }
 
   Future<void> _fetchData() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
+    final repository = AdminRepository();
+    List<Admin> fetchedUsers = await repository.fetchAdmins();
 
-      final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
+    setState(() {
+      users = fetchedUsers;
+      isLoading = false;
+    });
 
-      List<PresentVehicle> apiVehicles = (response.data as List<dynamic>).map((vehicleData) {
-        return PresentVehicle(
-          vehicleid: vehicleData['vehicle_id'].toString(),
-          vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
-          vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registered: vehicleData['vehicle_registered'].toString(),
-        );
-      }).toList();
-      print("Fetch Data Successful");
-      apiVehicles.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
+  }
+  void _filterVehicles(String query) {
+    setState(() {
 
-      setState(() {
-        vehicles = apiVehicles;
-      });
-    } catch (error) {
-      print('Error fetching data: $error');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+
+    });
+  }
+
+  Future<void> _refreshData() async {
+    _fetchData();
+  }
+  void _addPassenger() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const AddPassengerDialog();
+      },
+    );
   }
 
   void _editVehicle(PresentVehicle vehicle) {
@@ -160,32 +116,6 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
     }
   }
 
-  void _filterVehicles(String query) {
-    setState(() {
-      vehicles = _searchVehicles(query);
-    });
-  }
-
-  List<PresentVehicle> _searchVehicles(String query) {
-    return vehicles.where((vehicle) {
-      return vehicle.vehiclecapacity.toLowerCase().contains(query.toLowerCase()) ||
-          vehicle.vehiclenumber.toLowerCase().contains(query.toLowerCase());
-    }).toList();
-  }
-
-  void _addVehicle() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const AddVehicleDialog();
-      },
-    );
-  }
-
-  Future<void> _refreshData() async {
-    _fetchDummyData();
-    _fetchData();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,13 +145,13 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: "Enter Vehicle Capacity,Vehicle Number",
+                        hintText: "Enter Passenger Name ,Phone Number",
                         hintStyle: const TextStyle(color: Colors.grey),
                         fillColor: Colors.grey.withOpacity(0.5),
                         filled: true,
                         suffixIcon: IconButton(
                             onPressed: () {
-                              _searchVehicles(_searchController.text);
+                              // _searchVehicles(_searchController.text);
                             },
                             icon: const Icon(Icons.search_rounded)),
                         border: OutlineInputBorder(
@@ -232,6 +162,24 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
                         ),
                       ),
                     ),
+                  ),
+                  SizedBox(width: 10,),
+                  ElevatedButton(
+                    onPressed: () => _addPassenger(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colours.buttonBackground,
+                      foregroundColor: Colours.textColor,
+                    ),
+                    child: const Text("Add"),
+                  ),
+                  SizedBox(width: 10,),
+                  ElevatedButton(
+                    onPressed: () => _addPassenger(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colours.buttonBackground,
+                      foregroundColor: Colours.textColor,
+                    ),
+                    child: const Text("Current / Schedule"),
                   ),
                   const Spacer(),
                   Row(
@@ -285,37 +233,31 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
                       columns: const [
                         DataColumn(
                           label: Text(
-                            'S.No',
+                            'Passenger ID',
                             textAlign: TextAlign.center,
                           ),
                         ),
                         DataColumn(
                           label: Text(
-                            'Name',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Email',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Phone Number',
+                            'Date',
                             textAlign: TextAlign.center, // Center align the heading
                           ),
                         ),
                         DataColumn(
                           label: Text(
-                            'Vehicle Capacity',
+                            'Route ID',
                             textAlign: TextAlign.center,
                           ),
                         ),
                         DataColumn(
                           label: Text(
-                            'Vehicle Number',
+                            'Passengers',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Vehicle',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -338,133 +280,65 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
                           ),
                         ),
                       ],
-                      // rows: vehicles
-                      //     .skip(_pageIndex * _rowsPerPage)
-                      //     .take(_rowsPerPage)
-                      //     .toList()
-                      //     .asMap()
-                      //     .entries
-                      //     .map((entry) {
-                      //   final int index = entry.key + (_pageIndex * _rowsPerPage);
-                      //   final PresentVehicle vehicle = entry.value;
-                      //   final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
-                      //   return DataRow(
-                      //     // selected: _selectedRows.contains(user),
-                      //     // onSelectChanged: (isSelected) {
-                      //     //   setState(() {
-                      //     //     if (isSelected ?? false) {
-                      //     //       _selectedRows.add(user);
-                      //     //     } else {
-                      //     //       _selectedRows.remove(user);
-                      //     //     }
-                      //     //   });
-                      //     // },
-                      //     color: MaterialStateProperty.all(color),
-                      //     cells: [
-                      //       DataCell(
-                      //         Text(
-                      //           vehicle.vehicleid,
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           "Abdul Malik",
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           "Aaa@gmail.com",
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           "9087035132",
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(vehicle.vehiclecapacity),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           vehicle.vehiclenumber,
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         IconButton(
-                      //           onPressed: () => _editVehicle(vehicle),
-                      //           icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         IconButton(
-                      //           onPressed: () => _toggleAccess(vehicle),
-                      //           icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
-                      //         ),
-                      //       ),
-                      //     ],
-                      //   );
-                      // }).toList(),
-                      rows: dummyDrivers.map((driver) {
-                        final Color color = dummyDrivers.indexOf(driver).isOdd ? Colors.grey[300]! : Colors.grey[100]!;
+                      rows: users
+                          .skip(_pageIndex * _rowsPerPage)
+                          .take(_rowsPerPage)
+                          .toList()
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                        final int index = entry.key + (_pageIndex * _rowsPerPage);
+                        final Admin admin = entry.value;
+                        final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
                         return DataRow(
+                          // selected: _selectedRows.contains(user),
+                          // onSelectChanged: (isSelected) {
+                          //   setState(() {
+                          //     if (isSelected ?? false) {
+                          //       _selectedRows.add(user);
+                          //     } else {
+                          //       _selectedRows.remove(user);
+                          //     }
+                          //   });
+                          // },
                           color: MaterialStateProperty.all(color),
                           cells: [
                             DataCell(
                               Text(
-                                driver.id.toString(),
+                                '${index + 1}',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Text("06/04/2024"),
+                            ),
+                            DataCell(
+                              Text(
+                                "KADTN101",
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
                               Text(
-                                driver.name,
+                                "400",
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
                               Text(
-                                driver.email,
+                                "40",
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
                               Text(
-                                driver.phoneNumber,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                driver.vehicleCapacity,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                driver.vehicleNumber,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                DateFormat('MMM dd, yyyy').format(driver.createdAt),
+                                "04/04/2024",
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
                               IconButton(
-                                onPressed: () => {},
+                                onPressed: (){},
                                 icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
                               ),
                             ),
@@ -477,7 +351,6 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
                           ],
                         );
                       }).toList(),
-
                     ),
                   ),
                 ),

@@ -11,7 +11,6 @@ class Colours {
   static const Color green = Color(0xff008000);
   static const Color black = Color(0xff2a2b2c);
 
-
   //separate Colours
   static const Color appBarBackground = Colours.black;
   static const Color textColor = Colours.white;
@@ -21,16 +20,6 @@ class Colours {
   static const Color Removedvehicletabletop = Color(0xffea6438);
   static const Color Removedvehiclebutton = Color(0xffea6438);
   static const Color Addvehiclebutton = Color(0xffea6438);
-
-
-
-
-
-
-
-
-
-
 }
 
 

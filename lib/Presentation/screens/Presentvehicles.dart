@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Data/Models/Presentvehicle.dart';
+import 'package:tec_admin/Data/Repositories/Present_vehcile_repositories.dart';
 import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
 import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 
@@ -16,7 +18,8 @@ class PresentVehicleScreen extends StatefulWidget {
 }
 
 class _VehicleManagementPageState extends State<PresentVehicleScreen> {
-  List<PresentVehicle> vehicles = [];
+  final PresentVehicleRepository _repository = PresentVehicleRepository();
+  List<PresentVehicle> _vehicles = [];
   bool isLoading = false;
   late String currentTime;
   late String currentDate;
@@ -77,30 +80,17 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
   }
 
   int _calculateTotalPages() {
-    return (vehicles.length / _rowsPerPage).ceil();
+    return (_vehicles.length / _rowsPerPage).ceil();
   }
 
   Future<void> _fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
+      final vehicles = await _repository.fetchVehicles();
       setState(() {
-        isLoading = true;
-      });
-
-      final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
-
-      List<PresentVehicle> apiVehicles = (response.data as List<dynamic>).map((vehicleData) {
-        return PresentVehicle(
-          vehicleid: vehicleData['vehicle_id'].toString(),
-          vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
-          vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registeded: vehicleData['vehicle_registered'].toString(),
-        );
-      }).toList();
-      print("Fetch Data Successful");
-      apiVehicles.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
-
-      setState(() {
-        vehicles = apiVehicles;
+        _vehicles = vehicles;
       });
     } catch (error) {
       print('Error fetching data: $error');
@@ -145,12 +135,12 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
 
   void _filterVehicles(String query) {
     setState(() {
-      vehicles = _searchVehicles(query);
+      _vehicles = _searchVehicles(query);
     });
   }
 
   List<PresentVehicle> _searchVehicles(String query) {
-    return vehicles.where((vehicle) {
+    return _vehicles.where((vehicle) {
       return vehicle.vehiclecapacity.toLowerCase().contains(query.toLowerCase()) ||
           vehicle.vehiclenumber.toLowerCase().contains(query.toLowerCase());
     }).toList();
@@ -167,6 +157,42 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
 
   Future<void> _refreshData() async {
     _fetchData();
+  }
+  Future<void> _downloaddata() async {
+    await _fetchData(); // Fetch data from the server
+
+    // Generate CSV data
+    String csvData = _generateCsvData(_vehicles);
+
+    // Initiate download
+    _downloadCsv(csvData);
+
+  }
+
+  String _generateCsvData(List<PresentVehicle> users) {
+    String csvData = 'Vehicle ID,Vehicle Capacity,Vehicle Number,Registered At\n';
+    for (var vehicle in _vehicles) {
+      csvData += '${vehicle.vehicleid},${vehicle.vehiclecapacity},${vehicle.vehiclenumber},${vehicle.registered}\n';
+    }
+    return csvData;
+  }
+
+  void _downloadCsv(String csvData) {
+    // Create a Blob containing the CSV data
+    Blob blob = Blob([csvData], 'text/csv');
+
+    // Create a URL for the Blob
+    String url = Url.createObjectUrlFromBlob(blob);
+
+    // Create a link element
+    AnchorElement anchor = AnchorElement(href: url)
+      ..setAttribute('download', 'admin_data.csv');
+
+    // Simulate a click to initiate the download
+    anchor.click();
+
+    // Revoke the URL to free up memory
+    Url.revokeObjectUrl(url);
   }
 
   @override
@@ -302,7 +328,7 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
                           ),
                         ),
                       ],
-                      rows: vehicles
+                      rows: _vehicles
                           .skip(_pageIndex * _rowsPerPage)
                           .take(_rowsPerPage)
                           .toList()
@@ -342,7 +368,7 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
                             ),
                             DataCell(
                               Text(
-                                DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registeded)),
+                                DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
                                 textAlign: TextAlign.center,
                               ),
                             ),

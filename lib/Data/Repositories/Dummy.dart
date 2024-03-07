@@ -5,7 +5,9 @@ class DummydataRepository {
     return [
       Dummydata(
         id: 1,
+        online: "2:30",
         name: 'Abdul Malik',
+        routeid: 'RD101',
         email: 'abdul.malik@kaditinnovations.com',
         phoneNumber: '123-456-7890',
         vehicleCapacity: "CAR6",
@@ -14,7 +16,9 @@ class DummydataRepository {
       ),
       Dummydata(
         id: 2,
+        online: "3:30",
         name: 'Samynathan',
+        routeid: 'RD102',
         email: 'samynatha.s@kaditinnovations.com',
         phoneNumber: '123-456-7890',
         vehicleCapacity: "BUS50",
@@ -23,7 +27,9 @@ class DummydataRepository {
       ),
       Dummydata(
         id: 3,
+        online: "4:30",
         name: 'Boopathy',
+        routeid: 'RD201',
         email: 'boopathy@kaditinnovations.com',
         phoneNumber: '123-456-7890',
         vehicleCapacity: "VAN30",
@@ -32,7 +38,10 @@ class DummydataRepository {
       ),
       Dummydata(
         id: 4,
+        online: "5:30",
         name: 'Sudalaimani',
+        routeid: 'RD202',
+
         email: 'sudalai.mani@kaditinnovations.com',
         phoneNumber: '123-456-7890',
         vehicleCapacity: "VAN25",
@@ -41,7 +50,10 @@ class DummydataRepository {
       ),
       Dummydata(
         id: 5,
+        online: "6:30",
         name: 'Masood',
+        routeid: 'RD301',
+
         email: 'masood@kaditinnovations.com',
         phoneNumber: '123-456-7890',
         vehicleCapacity: "CAR8",

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:tec_admin/Data/Models/AddaDmin_model.dart';
+import 'package:tec_admin/Data/Models/Addadmin_model.dart';
 
 
 class AdminRepository {

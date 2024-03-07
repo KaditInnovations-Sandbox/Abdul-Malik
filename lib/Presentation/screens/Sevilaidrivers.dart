@@ -47,7 +47,8 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
     _fetchData();
     _searchController.addListener(() {
       _filterVehicles(_searchController.text);
-    });
+    }
+    );
   }
 
   Future<void> _fetchDummyData() async {
@@ -110,7 +111,7 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
           vehicleid: vehicleData['vehicle_id'].toString(),
           vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
           vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registeded: vehicleData['vehicle_registered'].toString(),
+          registered: vehicleData['vehicle_registered'].toString(),
         );
       }).toList();
       print("Fetch Data Successful");
@@ -186,7 +187,6 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
     _fetchDummyData();
     _fetchData();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -396,7 +396,7 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
                       //       ),
                       //       DataCell(
                       //         Text(
-                      //           DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registeded)),
+                      //           DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
                       //           textAlign: TextAlign.center,
                       //         ),
                       //       ),

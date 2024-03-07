@@ -110,7 +110,7 @@ class _VehicleManagementPageState extends State<Removeddrivers> {
           vehicleid: vehicleData['vehicle_id'].toString(),
           vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
           vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registeded: vehicleData['vehicle_registered'].toString(),
+          registered: vehicleData['vehicle_registered'].toString(),
         );
       }).toList();
       print("Fetch Data Successful");
@@ -391,7 +391,7 @@ class _VehicleManagementPageState extends State<Removeddrivers> {
                       //       ),
                       //       DataCell(
                       //         Text(
-                      //           DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registeded)),
+                      //           DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
                       //           textAlign: TextAlign.center,
                       //         ),
                       //       ),

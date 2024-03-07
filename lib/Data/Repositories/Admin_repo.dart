@@ -12,7 +12,7 @@ class AdminRepository {
           firstName: userData['admin_first_name'].toString(),
           lastName: userData['admin_last_name'].toString(),
           phoneNumber: userData['admin_phone'].toString(),
-          role: userData['admin_email'].toString(),
+          email: userData['admin_email'].toString(),
         );
       }).toList();
 

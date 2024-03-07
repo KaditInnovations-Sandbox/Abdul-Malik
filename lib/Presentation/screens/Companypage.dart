@@ -3,8 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Presentation/screens/Companydetails.dart';
+import 'package:tec_admin/Presentation/widgets/AddCompany.dart';
 import 'package:tec_admin/Presentation/widgets/Addadmin.dart';
-
 import '../../Utills/date_time_utils.dart';
 
 class User {
@@ -21,8 +21,14 @@ class User {
   });
 }
 
+enum FilterOption {
+  all,
+  active,
+  inactive,
+}
+
 class Company extends StatefulWidget {
-  const Company({super.key, Key});
+  const Company({Key? key}) : super(key: key);
 
   @override
   _CompanyState createState() => _CompanyState();
@@ -45,13 +51,20 @@ class _CompanyState extends State<Company> {
     currentTime = DateTimeUtils.getCurrentTime();
     currentDate = DateTimeUtils.getCurrentDate();
     // Update date and time every second
-    _timer = Timer.periodic(const Duration(seconds: 0), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         currentTime = DateTimeUtils.getCurrentTime();
         currentDate = DateTimeUtils.getCurrentDate();
       });
     });
     _fetchData();
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer in the dispose method
+    _timer.cancel();
+    super.dispose();
   }
 
   void _onPreviousPage() {
@@ -69,9 +82,11 @@ class _CompanyState extends State<Company> {
   int _calculateTotalPages() {
     return (users.length / _rowsPerPage).ceil();
   }
+
   Future<void> _refreshData() async {
     _fetchData();
   }
+
   Future<void> _fetchData() async {
     try {
       setState(() {
@@ -107,13 +122,30 @@ class _CompanyState extends State<Company> {
 
   void _toggleAccess(User user) {}
 
-  void _filterUsers() {}
+  void _filterUsers(FilterOption filterOption) {
+    setState(() {
+      switch (filterOption) {
+        case FilterOption.all:
+        // Show all users
+        // No need to modify the 'users' list here
+          break;
+        case FilterOption.active:
+        // Show active users
+          users = users.where((user) => user.role.toLowerCase() == 'active').toList();
+          break;
+        case FilterOption.inactive:
+        // Show inactive users
+          users = users.where((user) => user.role.toLowerCase() == 'inactive').toList();
+          break;
+      }
+    });
+  }
 
   void _addUser() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddAdminDialog();
+        return const AddCompanyDialog();
       },
     );
   }
@@ -140,8 +172,8 @@ class _CompanyState extends State<Company> {
       return Scaffold(
         backgroundColor: Colours.white,
         appBar: AppBar(
-          centerTitle: false,
-          backgroundColor: Colors.black,
+          centerTitle: true,
+          backgroundColor: Colours.black,
           title: Row(
             children: [
               Column(
@@ -162,32 +194,26 @@ class _CompanyState extends State<Company> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const SizedBox(width: 130,),
-                ElevatedButton(
-                  onPressed: () => _addUser(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffea6238),
-                    foregroundColor: Colors.white,
+                IconButton(
+                  onPressed: () {},
+                  icon: ImageIcon(
+                    AssetImage("assets/orange.png"),
+                    color: Colours.white,
                   ),
-                  child: const Text("Add"),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: () => _filterUsers(),
+                  onPressed: () => _addUser(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffea6238),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colours.orange,
+                    foregroundColor: Colours.white,
                   ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.file_copy_sharp),
-                      SizedBox(width: 3,),
-                      Text("Export")
-                    ],
-                  ),
+                  child: const Text("Add"),
                 ),
                 const SizedBox(width: 26),
               ],
             ),
+
           ],
         ),
         body: isLoading
@@ -203,7 +229,7 @@ class _CompanyState extends State<Company> {
                 color: Colors.white,
                 child: Row(
                   children: [
-                    IconButton(onPressed: ()=>_refreshData(), icon: const Icon(Icons.refresh)),
+                    IconButton(onPressed: () => _refreshData(), icon: const Icon(Icons.refresh)),
                     SizedBox(
                       width: 600,
                       height: 50,
@@ -222,6 +248,29 @@ class _CompanyState extends State<Company> {
                           ),
                         ),
                       ),
+                    ),
+                    SizedBox(width: 10,),
+                    PopupMenuButton<FilterOption>(
+                      onSelected: (FilterOption result) {
+                        setState(() {
+                          _filterUsers(result);
+                        });
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<FilterOption>>[
+                        const PopupMenuItem<FilterOption>(
+                          value: FilterOption.all,
+                          child: Text('All'),
+                        ),
+                        const PopupMenuItem<FilterOption>(
+                          value: FilterOption.active,
+                          child: Text('Active'),
+                        ),
+                        const PopupMenuItem<FilterOption>(
+                          value: FilterOption.inactive,
+                          child: Text('Inactive'),
+                        ),
+                      ],
+                      icon: const Icon(Icons.view_column_outlined,color: Colours.orange,),
                     ),
                     const Spacer(),
                     Row(
@@ -245,7 +294,6 @@ class _CompanyState extends State<Company> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                 scrollDirection: Axis.vertical,
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
@@ -272,6 +320,12 @@ class _CompanyState extends State<Company> {
                       columns: const [
                         DataColumn(
                           label: Text(
+                            'Company ID',
+                            textAlign: TextAlign.center, // Center align the heading
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
                             'Company Name',
                             textAlign: TextAlign.center, // Center align the heading
                           ),
@@ -290,7 +344,25 @@ class _CompanyState extends State<Company> {
                         ),
                         DataColumn(
                           label: Text(
+                            'Start Date',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'End Date',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
                             'POC',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Created at',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -315,40 +387,55 @@ class _CompanyState extends State<Company> {
                         return DataRow(
                           color: MaterialStateProperty.all(color),
                           cells: [
-                            DataCell(Flexible(
-                                child:TextButton(onPressed: () =>_viewCompanyDetails('${user.firstName} ${user.lastName}'),
-                                    child: Text("${user.firstName} ${user.lastName}",
-                                      style: const TextStyle(color: Colors.black,fontSize: 12),
-                                      textAlign: TextAlign.center,))
-                            )),
-                            DataCell(Flexible(
-                              child: Text(user.role,
-                                textAlign: TextAlign.center,),
-                            )),
-                            DataCell(Flexible(
-                              child: Text(user.phoneNumber,
+                            DataCell(
+                              Text(
+                                '${index + 1}',
                                 textAlign: TextAlign.center,
                               ),
-                            )),
-                            const DataCell(Text("Trip Admin",
-
-                              textAlign: TextAlign.center,)),
-                            DataCell(Flexible(
-                              child: IconButton(
-                                onPressed: () => _editUser(user),
-                                icon: const Icon(Icons.edit, color: Colors.deepOrange),
+                            ),
+                            DataCell(TextButton(onPressed: () => _viewCompanyDetails('${user.firstName} ${user.lastName}'),
+                                child: Text("${user.firstName} ${user.lastName}",
+                                  style: const TextStyle(color: Colours.orange, fontSize: 12),
+                                  textAlign: TextAlign.center,))),
+                            DataCell(
+                              Text(user.role,
+                                textAlign: TextAlign.center,),
+                            ),
+                            DataCell(Text(user.phoneNumber,
+                              textAlign: TextAlign.center,
+                            ),),
+                            DataCell(
+                              Text(
+                                '1/4/2024',
+                                textAlign: TextAlign.center,
                               ),
+                            ),
+                            DataCell(
+                              Text(
+                                '1/5/2024',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                                Text(
+                                  "${user.firstName} ${user.lastName}",
+                                  textAlign: TextAlign.center,)
+                            ),
+                            DataCell(
+                              Text(
+                                '28/2/2024',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(IconButton(
+                              onPressed: () => _editUser(user),
+                              icon: const Icon(Icons.edit, color: Colours.orange),
                             )),
-                            DataCell(Flexible(
-                              child: TextButton(
+                            DataCell(IconButton(
                                 onPressed: () => _toggleAccess(user),
-                                child: const Text(
-                                  "Remove access",
-                                  style: TextStyle(color: Colors.deepOrange,),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )),
+                                icon: Icon(Icons.remove_circle_outline, color: Colours.orange,)
+                            )
+                            ),
                           ],
                         );
                       }).toList(),

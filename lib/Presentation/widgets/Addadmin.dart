@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:tec_admin/Data/Models/AddaDmin_model.dart';
+import 'package:tec_admin/Data/Models/Addadmin_model.dart';
 import 'package:tec_admin/Data/Repositories/Addadmin_repo.dart';
 
 class AddAdminDialog extends StatefulWidget {

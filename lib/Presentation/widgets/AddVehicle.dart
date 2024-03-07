@@ -29,7 +29,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.3,
-            height: MediaQuery.of(context).size.height * 0.44,
+            height: MediaQuery.of(context).size.height * 0.478,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20.0),
@@ -62,6 +62,11 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                                     if (value == null || value.isEmpty) {
                                       return 'Vehicle Capacity is required';
                                     }
+                                    RegExp regex = RegExp(r'^[a-zA-Z]{3}\d{2}$');
+                                    if (!regex.hasMatch(value)) {
+                                      return '(e.g., BUS50)';
+                                    }
+                                    return null;
                                     return null;
                                   },
                                 ),
@@ -82,6 +87,10 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                                     if (value == null || value.isEmpty) {
                                       return 'Vehicle Number is required';
                                     }
+                                    RegExp regex = RegExp(r'^[a-zA-Z]{3}\d{3}$');
+                                    if (!regex.hasMatch(value)) {
+                                      return '(e.g., ABC123)';
+                                    }
                                     return null;
                                   },
                                 ),
@@ -90,7 +99,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
 
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 3),
                           ElevatedButton(
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {

@@ -5,6 +5,7 @@ import 'package:tec_admin/Presentation/screens/Contractdriver.dart';
 import 'package:tec_admin/Presentation/screens/Removeddrivers.dart';
 import 'package:tec_admin/Presentation/screens/Removedvehicles.dart';
 import 'package:tec_admin/Presentation/screens/Sevilaidrivers.dart';
+import 'package:tec_admin/Presentation/widgets/AddDriver.dart';
 import 'package:tec_admin/Presentation/widgets/AddService.dart';
 import 'package:tec_admin/Presentation/screens/Presentvehicles.dart';
 import 'package:tec_admin/Utills/date_time_utils.dart';
@@ -48,7 +49,7 @@ class _DriverState extends State<Driver> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddServiceDialog();
+        return const AddDriverDialog();
       },
     );
   }
