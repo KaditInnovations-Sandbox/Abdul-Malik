@@ -1,21 +1,22 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:testapp/Presentation/widgets/EmailforOtp.dart';
+import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Data/Models/Loginmodel.dart';
+import 'package:tec_admin/Data/Repositories/Login_repo.dart';
+import 'package:tec_admin/Presentation/widgets/EmailforOtp.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class Loginpage extends StatefulWidget {
+  const Loginpage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<Loginpage> createState() => _LoginpageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginpageState extends State<Loginpage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final UserRepository loginRepository = UserRepository();
+  bool isPasswordVisible = false;
+  bool rememberMe = false;
 
   bool isEmail(String input) {
     final emailRegex =
@@ -28,201 +29,106 @@ class _LoginPageState extends State<LoginPage> {
     return phoneNumberRegex.hasMatch(input);
   }
 
-  bool isPasswordVisible = false;
-  bool rememberMe = false;
-
-  final Dio dio = Dio();
-
-  void _email() async {
-    final String username = usernameController.text;
+  Future<void> _login() async {
+    final String email = usernameController.text;
     final String password = passwordController.text;
 
-    try {
-      const String apiUrl =
-          'http://localhost:8081/travelease/AdminEmaillogin';
+    final UserModel user = UserModel(username: email, password: password);
+    final bool success = await UserRepository().login(user);
 
-      Map<String, dynamic> adminData = {
-        "admin_email": username,
-        "admin_password": password,
-      };
-
-      final Response response = await dio.post(
-        apiUrl,
-        data: adminData,
-      );
-
-      if (response.statusCode == 200) {
-        Navigator.of(context).pop();
-      } else {
-        print('Error: ${response.statusCode} - ${response.statusMessage}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> _phone() async {
-    try {
-      final Response response = await dio.post(
-        'http://localhost:8081/travelease/AdminPhonelogin',
-        data: {
-          "admin_phone": usernameController.text,
-          "admin_password": passwordController.text,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Navigator.of(context).pop();
-      } else {
-        print('Error: ${response.statusCode} - ${response.statusMessage}');
-      }
-    } catch (e) {
-      print('Error: $e');
+    if (success) {
+      Navigator.pushNamed(context, '/home');
+    } else {
+      print('Login failed');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black, Colors.black87, Colors.grey],
-          ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: MediaQuery.of(context).size.width * 0,
-              bottom: MediaQuery.of(context).size.height * 0,
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height / 1.25,
-                child: Image.asset(
-                  "assets/bus.png",
-                  fit: BoxFit.fill,
-                ),
-              ),
+      backgroundColor: Colours.orange,
+      body: Stack(
+        children: [
+          Positioned(
+            width: MediaQuery.of(context).size.width * 1,
+            height: MediaQuery.of(context).size.height * 1.4,
+            child: Image.asset(
+              "assets/background.jpg",
+              fit: BoxFit.cover,
             ),
-            Positioned(
-              left: MediaQuery.of(context).size.width * 0.1,
-              bottom: MediaQuery.of(context).size.height * 0.05,
-              child: Container(
-                width: MediaQuery.of(context).size.width / 3.5,
-                height: MediaQuery.of(context).size.height * 0.8,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
-                      spreadRadius: 1,
-                      blurRadius: 15,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 45.0, right: 45),
+          ),
+          Positioned.fill(
+            child: Image.asset(
+              "assets/map.png",
+              fit: BoxFit.fill,
+            ),
+          ),
+          Center(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colours.white.withOpacity(0.9), // Adjust the opacity of the white background
+
+              ),
+              width: MediaQuery.of(context).size.width * 0.28,
+              height: MediaQuery.of(context).size.height * 0.55,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height / 9),
                       Center(
                         child: Image.asset(
                           "assets/logo.png",
-                          height: MediaQuery.of(context).size.height / 5,
-                          width: MediaQuery.of(context).size.width / 5,
+                          height: MediaQuery.of(context).size.height * 0.1,
+                          width: MediaQuery.of(context).size.width * 0.1,
                         ),
                       ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height / 13),
-                      const Text(
-                        'Email or Phone Number',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: 40,),
                       TextField(
                         controller: usernameController,
-                        onEditingComplete: () {
-                          if (isEmail(usernameController.text) ||
-                              isPhoneNumber(usernameController.text)) {
-                            // Check if email or phone, then call the appropriate method
-                            if (isEmail(usernameController.text)) {
-                              _email();
-                            } else {
-                              _phone();
-                            }
-                          } else {
-                            print('Invalid email or phone number format');
-                          }
-                        },
+                        onEditingComplete: _login,
                         decoration: InputDecoration(
+                          hintText: "Username",
                           fillColor: Colors.grey.shade300,
                           filled: true,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Password',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: 20,),
                       TextField(
                         controller: passwordController,
                         obscureText: !isPasswordVisible,
-                        onEditingComplete: () {
-                          if (isEmail(usernameController.text) ||
-                              isPhoneNumber(usernameController.text)) {
-                            // Check if email or phone, then call the appropriate method
-                            if (isEmail(usernameController.text)) {
-                              _email();
-                            } else {
-                              _phone();
-                            }
-                          } else {
-                            print('Invalid email or phone number format');
-                          }
-                        },
+                        onEditingComplete: _login,
                         decoration: InputDecoration(
                           fillColor: Colors.grey.shade300,
+                          hintText: "Password",
                           filled: true,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
                               color: Colors.white,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
                               color: Colors.white,
                             ),
@@ -243,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: 5,),
                       Row(
                         children: [
                           Checkbox(
@@ -258,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const Text(
                             'Remember me',
-                            style: TextStyle(color: Colors.orange),
+                            style: TextStyle(color: Colors.black),
                           ),
                           const Spacer(),
                           TextButton(
@@ -272,45 +178,33 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             child: const Text(
                               'Forgot Password?',
-                              style: TextStyle(color: Colors.orange),
+                              style: TextStyle(color: Colours.orange),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 15),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (isEmail(usernameController.text) ||
-                                isPhoneNumber(usernameController.text)) {
-                              // Check if email or phone, then call the appropriate method
-                              if (isEmail(usernameController.text)) {
-                                _email();
-                              } else {
-                                _phone();
-                              }
-                            } else {
-                              print('Invalid email or phone number format');
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            minimumSize: Size(
-                              MediaQuery.of(context).size.width / 2.8 - 90,
-                              50,
+                      Stack(
+                        children: [
+
+                          Center(
+                            child: TextButton(
+                              onPressed: _login,
+                              child: Text(
+                                "Login",
+                                style: TextStyle(color: Colours.black, fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          ),
-                          child: const Text('Login'),
-                        ),
-                      ),
+                          )
+                        ],
+                      )
                     ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

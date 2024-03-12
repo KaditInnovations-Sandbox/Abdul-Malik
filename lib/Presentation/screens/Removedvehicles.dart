@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:testapp/Data/Models/Removedvehicle.dart';
-import 'package:testapp/Data/Repositories/Removed_vehilce_repository.dart';
+import 'package:tec_admin/Data/Models/Removedvehicle.dart';
+import 'package:tec_admin/Data/Repositories/Removed_vehilce_repository.dart';
 
 class RemovedVehicleScreen extends StatefulWidget {
   const RemovedVehicleScreen({Key? key}) : super(key: key);
@@ -15,8 +15,6 @@ class _RemovedVehicleScreenState extends State<RemovedVehicleScreen> {
   final RemovedVehicleRepository _repository = RemovedVehicleRepository();
   List<RemovedVehicle> _vehicles = [];
   bool _isLoading = false;
-  late String _currentTime;
-  late String _currentDate;
   late Timer _timer;
   final int _rowsPerPage = 20;
   int _pageIndex = 0;
@@ -25,15 +23,7 @@ class _RemovedVehicleScreenState extends State<RemovedVehicleScreen> {
   void initState() {
     super.initState();
     // Initialize current date and time
-    _updateTime();
-    _updateDate();
     // Update date and time every second
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _updateTime();
-        _updateDate();
-      });
-    });
     _fetchData();
   }
 
@@ -42,16 +32,6 @@ class _RemovedVehicleScreenState extends State<RemovedVehicleScreen> {
     // Cancel the timer in the dispose method
     _timer.cancel();
     super.dispose();
-  }
-
-  void _updateTime() {
-    final now = DateTime.now();
-    _currentTime = DateFormat('hh:mm a').format(now);
-  }
-
-  void _updateDate() {
-    final now = DateTime.now();
-    _currentDate = DateFormat('MMM dd, yyyy').format(now);
   }
 
   void _onPreviousPage() {
@@ -213,15 +193,15 @@ class _RemovedVehicleScreenState extends State<RemovedVehicleScreen> {
                           cells: [
                             DataCell(
                               Text(
-                                vehicle.vehicleId,
+                                vehicle.vehicleid,
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
-                              Text(vehicle.vehicleCapacity),
+                              Text(vehicle.vehiclecapacity),
                             ),
                             DataCell(
-                              Text(vehicle.vehicleNumber, textAlign: TextAlign.center,),
+                              Text(vehicle.vehiclenumber, textAlign: TextAlign.center,),
                             ),
                             DataCell(
                               Text(
@@ -231,7 +211,7 @@ class _RemovedVehicleScreenState extends State<RemovedVehicleScreen> {
                             ),
                             DataCell(
                               IconButton(
-                                onPressed: () => _repository.removeVehicleAccess(vehicle.vehicleNumber),
+                                onPressed: () => _repository.removeVehicleAccess(vehicle.vehiclenumber),
                                 icon: const Icon(Icons.add_circle_outline, color: Color(0xffea6238)),
                               ),
                             ),

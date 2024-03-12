@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:testapp/Data/Models/Removedvehicle.dart';
+import 'package:tec_admin/Data/Models/Removedvehicle.dart';
 
 
 class RemovedVehicleRepository {
@@ -11,9 +11,9 @@ class RemovedVehicleRepository {
 
       final List<RemovedVehicle> vehicles = (response.data as List<dynamic>).map((vehicleData) {
         return RemovedVehicle(
-          vehicleId: vehicleData['vehicle_id'].toString(),
-          vehicleCapacity: vehicleData['vehicle_capacity'].toString(),
-          vehicleNumber: vehicleData['vehicle_number'].toString(),
+          vehicleid: vehicleData['vehicle_id'].toString(),
+          vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
+          vehiclenumber: vehicleData['vehicle_number'].toString(),
           registered: vehicleData['vehicle_registered'].toString(),
         );
       }).toList();
@@ -24,11 +24,11 @@ class RemovedVehicleRepository {
     }
   }
 
-  Future<void> removeVehicleAccess(String vehicleNumber) async {
+  Future<void> removeVehicleAccess(String vehiclenumber) async {
     try {
       final response = await _dio.put(
         'http://localhost:8081/travelease/BindVehicle',
-        data: vehicleNumber,
+        data: vehiclenumber,
       );
       if (response.statusCode == 200) {
         print('Vehicle access removed successfully');

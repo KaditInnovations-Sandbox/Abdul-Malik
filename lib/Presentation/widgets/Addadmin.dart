@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:tec_admin/Data/Models/Addadmin_model.dart';
+import 'package:tec_admin/Data/Repositories/Addadmin_repo.dart';
 
-class AddUserDialog extends StatefulWidget {
-  const AddUserDialog({Key? key}) : super(key: key);
+class AddAdminDialog extends StatefulWidget {
+  const AddAdminDialog({Key? key}) : super(key: key);
 
   @override
-  _AddUserDialogState createState() => _AddUserDialogState();
+  _AddAdminDialogState createState() => _AddAdminDialogState();
 }
 
-class _AddUserDialogState extends State<AddUserDialog> {
+class _AddAdminDialogState extends State<AddAdminDialog> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedRole;
-  final Dio _dio = Dio();
+  final AdminRepository _adminRepository = AdminRepository();
+
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _AdminnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -70,9 +73,9 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     }
                     return null;
                   }),
-                  _buildInputField(label: 'Username', hintText: 'Enter username', controller: _usernameController, validator: (value) {
+                  _buildInputField(label: 'Adminname', hintText: 'Enter Adminname', controller: _AdminnameController, validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Username is required';
+                      return 'Adminname is required';
                     }
                     return null;
                   }),
@@ -117,46 +120,22 @@ class _AddUserDialogState extends State<AddUserDialog> {
   }
 
   void _submitData() async {
+    final AdminModel admin = AdminModel(
+      firstName: _firstNameController.text,
+      lastName: _lastNameController.text,
+      phoneNumber: _phoneNumberController.text,
+      adminName: _AdminnameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      rolename: _selectedRole.toString(),
+    );
+
     try {
-      // Your API endpoint URL
-      const String apiUrl = 'http://localhost:8081/travelease/Admin';
-
-      // Data to be sent to the API
-      Map<String, dynamic> adminData = {
-        'admin_name': _usernameController.text,
-        'admin_password': _passwordController.text,
-        'admin_email': _emailController.text,
-        'admin_phone': _phoneNumberController.text,
-        'admin_first_name': _firstNameController.text,
-        'admin_last_name': _lastNameController.text,
-      };
-
-      // Data to be sent to the server
-      Map<String, dynamic> requestData = {
-        'admin': adminData,
-        'roleName': _selectedRole,
-      };
-
-      // Send POST request
-      final Response response = await _dio.post(
-        apiUrl,
-        data: requestData,
-      );
-
-      // Handle response
-      if (response.statusCode == 201) {
-        // Data sent successfully
-        Navigator.of(context).pop();
-        // Optionally, show a success message
-      } else {
-        // Error occurred while sending data
-        // Optionally, show an error message
-        print('Error: ${response.statusCode} - ${response.statusMessage}');
-      }
+      await _adminRepository.addAdmin(admin);
+      Navigator.of(context).pop();
     } catch (e) {
-      // Handle error
-      // Optionally, show an error message
       print('Error: $e');
+      // Handle error
     }
   }
 

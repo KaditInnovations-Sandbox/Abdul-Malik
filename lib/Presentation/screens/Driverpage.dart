@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:testapp/Presentation/screens/Companypage.dart';
-import 'package:testapp/Presentation/screens/Removedvehicles.dart';
-import 'package:testapp/Presentation/screens/Sevilaidrivers.dart';
-import 'package:testapp/Presentation/widgets/AddVehicle.dart';
-import 'package:testapp/Presentation/screens/Presentvehicles.dart';
-import 'package:testapp/Utills/date_time_utils.dart';
+import 'package:tec_admin/Presentation/screens/Companypage.dart';
+import 'package:tec_admin/Presentation/screens/Contractdriver.dart';
+import 'package:tec_admin/Presentation/screens/Removeddrivers.dart';
+import 'package:tec_admin/Presentation/screens/Removedvehicles.dart';
+import 'package:tec_admin/Presentation/screens/Sevilaidrivers.dart';
+import 'package:tec_admin/Presentation/widgets/AddDriver.dart';
+import 'package:tec_admin/Presentation/widgets/AddService.dart';
+import 'package:tec_admin/Presentation/screens/Presentvehicles.dart';
+import 'package:tec_admin/Utills/date_time_utils.dart';
 
 class Driver extends StatefulWidget {
   const Driver({Key? key}) : super(key: key);
@@ -46,7 +49,7 @@ class _DriverState extends State<Driver> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddVehicleDialog();
+        return const AddDriverDialog();
       },
     );
   }
@@ -66,7 +69,7 @@ class _DriverState extends State<Driver> {
                 children: [
                   Text(currentDate, style: const TextStyle(fontSize: 15, color: Colors.white)),
                   Text(
-                    "${currentTime}(SST)",
+                    "${currentTime}(SGT)",
                     style: const TextStyle(fontSize: 15, color: Colors.white),
                   ),
                 ],
@@ -154,8 +157,8 @@ class _DriverState extends State<Driver> {
               child: TabBarView(
                 children: [
                   Sevilaidrivers(),
-                  PresentVehicleScreen(),
-                  RemovedVehicleScreen(),
+                  Contractdrivers(),
+                  Removeddrivers()
                 ],
               ),
             ),

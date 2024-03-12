@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:testapp/Constants/Colours.dart';
-import 'package:testapp/Data/Models/Presentvehicle.dart';
-import 'package:testapp/Presentation/widgets/AddVehicle.dart';
-import 'package:testapp/Presentation/widgets/Editvehicle.dart';
+import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Data/Models/Presentvehicle.dart';
+import 'package:tec_admin/Data/Repositories/Present_vehcile_repositories.dart';
+import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
+import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 
 import 'package:dio/dio.dart';
 
@@ -16,7 +18,8 @@ class PresentVehicleScreen extends StatefulWidget {
 }
 
 class _VehicleManagementPageState extends State<PresentVehicleScreen> {
-  List<PresentVehicle> vehicles = [];
+  final PresentVehicleRepository _repository = PresentVehicleRepository();
+  List<PresentVehicle> _vehicles = [];
   bool isLoading = false;
   late String currentTime;
   late String currentDate;
@@ -63,6 +66,23 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
     final now = DateTime.now();
     currentDate = DateFormat('MMM dd, yyyy').format(now);
   }
+  Future<void> _fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final vehicles = await _repository.fetchVehicles();
+      setState(() {
+        _vehicles = vehicles;
+      });
+    } catch (error) {
+      print('Error fetching data: $error');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   void _onPreviousPage() {
     setState(() {
@@ -77,39 +97,10 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
   }
 
   int _calculateTotalPages() {
-    return (vehicles.length / _rowsPerPage).ceil();
+    return (_vehicles.length / _rowsPerPage).ceil();
   }
 
-  Future<void> _fetchData() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
 
-      final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
-
-      List<PresentVehicle> apiVehicles = (response.data as List<dynamic>).map((vehicleData) {
-        return PresentVehicle(
-          vehicleid: vehicleData['vehicle_id'].toString(),
-          vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
-          vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registeded: vehicleData['vehicle_registered'].toString(),
-        );
-      }).toList();
-      print("Fetch Data Successful");
-      apiVehicles.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
-
-      setState(() {
-        vehicles = apiVehicles;
-      });
-    } catch (error) {
-      print('Error fetching data: $error');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
 
   void _editVehicle(PresentVehicle vehicle) {
     showDialog(
@@ -145,29 +136,23 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
 
   void _filterVehicles(String query) {
     setState(() {
-      vehicles = _searchVehicles(query);
+      _vehicles = _searchVehicles(query);
     });
   }
 
   List<PresentVehicle> _searchVehicles(String query) {
-    return vehicles.where((vehicle) {
+    return _vehicles.where((vehicle) {
       return vehicle.vehiclecapacity.toLowerCase().contains(query.toLowerCase()) ||
           vehicle.vehiclenumber.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
 
-  void _addVehicle() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const AddVehicleDialog();
-      },
-    );
-  }
 
   Future<void> _refreshData() async {
     _fetchData();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -285,6 +270,12 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
                         ),
                         DataColumn(
                           label: Text(
+                            'Status',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
                             'Created at',
                             textAlign: TextAlign.center,
                           ),
@@ -302,7 +293,7 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
                           ),
                         ),
                       ],
-                      rows: vehicles
+                      rows: _vehicles
                           .skip(_pageIndex * _rowsPerPage)
                           .take(_rowsPerPage)
                           .toList()
@@ -342,7 +333,16 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
                             ),
                             DataCell(
                               Text(
-                                DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registeded)),
+                                vehicle.status ? 'Active' : 'Inactive',
+                                textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: vehicle.status ? Colors.green : Colors.red,
+                                  )
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
                                 textAlign: TextAlign.center,
                               ),
                             ),

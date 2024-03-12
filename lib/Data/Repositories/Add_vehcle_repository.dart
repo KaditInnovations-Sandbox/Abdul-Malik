@@ -1,7 +1,7 @@
 // lib/data/repositories/vehicle_repository.dart
 
 import 'package:dio/dio.dart';
-import 'package:testapp/Data/Models/AddVehicle.dart';
+import 'package:tec_admin/Data/Models/AddVehicle.dart';
 
 
 class VehicleRepository {

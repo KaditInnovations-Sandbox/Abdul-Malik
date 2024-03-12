@@ -1,13 +1,13 @@
 class RemovedVehicle {
-  final String vehicleId;
-  final String vehicleCapacity;
-  final String vehicleNumber;
+  final String vehicleid;
+  final String vehiclecapacity;
+  final String vehiclenumber;
   final String registered;
 
   RemovedVehicle({
-    required this.vehicleId,
-    required this.vehicleCapacity,
-    required this.vehicleNumber,
+    required this.vehicleid,
+    required this.vehiclecapacity,
+    required this.vehiclenumber,
     required this.registered,
   });
 }

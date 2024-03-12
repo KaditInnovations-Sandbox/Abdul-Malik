@@ -2,12 +2,14 @@ class PresentVehicle {
   String vehiclecapacity;
   String vehicleid;
   String vehiclenumber;
-  String registeded;
+  String registered;
+  bool status;
 
   PresentVehicle({
     required this.vehiclecapacity,
     required this.vehiclenumber,
-    required this.registeded,
+    required this.registered,
     required this.vehicleid,
+    required this.status,
   });
 }

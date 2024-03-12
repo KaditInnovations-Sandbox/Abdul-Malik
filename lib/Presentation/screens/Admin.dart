@@ -1,38 +1,34 @@
 import 'dart:async';
+import 'dart:html';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:testapp/Presentation//widgets/Adduser.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Data/Models/Admin.dart';
+import 'package:tec_admin/Data/Repositories/Admin_repo.dart';
+import 'package:tec_admin/Presentation//widgets/Addadmin.dart';
 import 'package:intl/intl.dart';
-import 'package:testapp/Utills/date_time_utils.dart';
+import 'package:tec_admin/Utills/date_time_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
 
-class User {
-  String firstName;
-  String lastName;
-  String phoneNumber;
-  String role;
 
-  User({
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    required this.role,
-  });
-}
 
-class Admin extends StatefulWidget {
-  const Admin({super.key, Key});
+class Adminpage extends StatefulWidget {
+  const Adminpage({super.key, Key});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
 }
 
-class _UserManagementPageState extends State<Admin> {
-  List<User> users = [];
+class _UserManagementPageState extends State<Adminpage> {
+  List<Admin> users = [];
   bool isLoading = false;
   late String currentTime;
   late String currentDate;
   final bool _isSelectedAll = false;
-  final List<User> _selectedRows = [];
+  final List<Admin> _selectedRows = [];
   late Timer _timer;
   final int _rowsPerPage = 20;
   int _pageIndex = 0;
@@ -78,47 +74,33 @@ class _UserManagementPageState extends State<Admin> {
   }
 
   Future<void> _fetchData() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
+    final repository = AdminRepository();
+    List<Admin> fetchedUsers = await repository.fetchAdmins();
 
-      final response = await Dio().get('http://localhost:8081/travelease/Admin');
+    setState(() {
+      users = fetchedUsers;
+      isLoading = false;
+    });
 
-      List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
-        return User(
-          firstName: userData['admin_first_name'].toString(),
-          lastName: userData['admin_last_name'].toString(),
-          phoneNumber: userData['admin_phone'].toString(),
-          role: userData['admin_email'].toString(),
-        );
-      }).toList();
-      print("Fetch Data Successful");
-      apiUsers.sort((a, b) => a.firstName.compareTo(b.firstName));
-
-      setState(() {
-        users = apiUsers;
-      });
-    } catch (error) {
-      print('Error fetching data: $error');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
   }
 
-  void _editUser(User user) {}
+  void _editUser(Admin admin) {
 
-  void _toggleAccess(User user) {}
+  }
 
-  void _filterUsers() {}
+  void _toggleAccess(Admin admin) {
+
+  }
+
+  void _filterUsers() {
+
+  }
 
   void _addUser() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddUserDialog();
+        return const AddAdminDialog();
       },
     );
   }
@@ -126,23 +108,59 @@ class _UserManagementPageState extends State<Admin> {
   Future<void> _refreshData() async {
     _fetchData();
   }
+  Future<void> _downloaddata() async {
+    await _fetchData(); // Fetch data from the server
+
+    // Generate CSV data
+    String csvData = _generateCsvData(users);
+
+    // Initiate download
+    _downloadCsv(csvData);
+
+  }
+
+  String _generateCsvData(List<Admin> users) {
+    String csvData = 'Name,Email,Phone Number,Created At\n';
+    for (var user in users) {
+      csvData += '${user.lastName},${user.email},${user.phoneNumber},27/02/2024\n';
+    }
+    return csvData;
+  }
+
+  void _downloadCsv(String csvData) {
+    // Create a Blob containing the CSV data
+    Blob blob = Blob([csvData], 'text/csv');
+
+    // Create a URL for the Blob
+    String url = Url.createObjectUrlFromBlob(blob);
+
+    // Create a link element
+    AnchorElement anchor = AnchorElement(href: url)
+      ..setAttribute('download', 'admin_data.csv');
+
+    // Simulate a click to initiate the download
+    anchor.click();
+
+    // Revoke the URL to free up memory
+    Url.revokeObjectUrl(url);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colours.white,
       appBar: AppBar(
         centerTitle: false,
-        backgroundColor: Colors.black,
+        backgroundColor: Colours.black,
         title: Row(
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(currentDate, style: const TextStyle(fontSize: 15, color: Colors.white)),
+                Text(currentDate, style: const TextStyle(fontSize: 15, color: Colours.white)),
                 Text(
-                  "${currentTime}(SST)",
-                  style: const TextStyle(fontSize: 15, color: Colors.white),
+                  "${currentTime}(SGT)",
+                  style: const TextStyle(fontSize: 15, color: Colours.white),
                 ),
               ],
             ),
@@ -154,28 +172,22 @@ class _UserManagementPageState extends State<Admin> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const SizedBox(width: 130,),
-              ElevatedButton(
-                onPressed: () => _addUser(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffea6238),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text("Add"),
+              IconButton(
+                  onPressed: () {
+                    _downloaddata();
+                  },
+                  icon: ImageIcon(
+                    AssetImage("assets/orange.png"),
+                    color: Colours.white,)
               ),
               const SizedBox(width: 16),
               ElevatedButton(
-                onPressed: () => _filterUsers(),
+                onPressed: () => _addUser(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffea6238),
+                  backgroundColor: Colours.orange,
                   foregroundColor: Colors.white,
                 ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.file_copy_sharp),
-                    SizedBox(width: 3,),
-                    Text("Export")
-                  ],
-                ),
+                child: const Text("Add"),
               ),
               const SizedBox(width: 26),
             ],
@@ -192,7 +204,7 @@ class _UserManagementPageState extends State<Admin> {
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: Container(
-              color: Colors.white,
+              color: Colours.white,
               child: Row(
                 children: [
                   IconButton(onPressed: ()=>_refreshData(), icon: const Icon(Icons.refresh)),
@@ -201,8 +213,8 @@ class _UserManagementPageState extends State<Admin> {
                     height: 50,
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: "Enter Name, Email, phone, Role",
-                        hintStyle: const TextStyle(color: Colors.grey),
+                        hintText: "Enter Name, Email, phone, Email",
+                        hintStyle: const TextStyle(color: Colours.grey),
                         fillColor: Colors.grey.withOpacity(0.5),
                         filled: true,
                         suffixIcon: const Icon(Icons.search_rounded),
@@ -248,17 +260,17 @@ class _UserManagementPageState extends State<Admin> {
                     child: DataTable(
                       columnSpacing: 5.0,
                       headingRowColor: MaterialStateProperty.resolveWith(
-                              (states) => const Color(0xffea6238)
+                              (states) => Colours.orange
                       ),
                       headingTextStyle: const TextStyle(
-                        color: Colors.white,
+                        color: Colours.white,
                         fontSize: 12, // Adjust heading font size
                       ),
                       headingRowHeight: 50.0,
                       dataRowHeight: 50.0,
                       dividerThickness: 0,
                       dataTextStyle: const TextStyle(
-                        color: Colors.black,
+                        color: Colours.black,
                         fontSize: 11,
                       ),
                       columns: const [
@@ -289,7 +301,7 @@ class _UserManagementPageState extends State<Admin> {
                         ),
                         DataColumn(
                           label: Text(
-                            'Role',
+                            'Email',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -314,7 +326,7 @@ class _UserManagementPageState extends State<Admin> {
                       ],
                       rows: users.skip(_pageIndex * _rowsPerPage).take(_rowsPerPage).toList().asMap().entries.map((entry) {
                         final int index = entry.key + (_pageIndex * _rowsPerPage);
-                        final User user = entry.value;
+                        final Admin admin = entry.value;
                         final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
                         return DataRow(
                           // selected: _selectedRows.contains(user),
@@ -336,13 +348,19 @@ class _UserManagementPageState extends State<Admin> {
                               ),
                             ),
                             DataCell(
-                              Text("${user.firstName} ${user.lastName}"),
+                              Text("${admin.admin_name}"),
                             ),
                             DataCell(
-                              Text(user.role, textAlign: TextAlign.center,),
+                              Text(
+                                admin.email,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                             DataCell(
-                              Text(user.phoneNumber, textAlign: TextAlign.center,),
+                              Text(
+                                admin.phoneNumber,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                             const DataCell(
                               Text("Trip Admin", textAlign: TextAlign.center,),
@@ -355,13 +373,13 @@ class _UserManagementPageState extends State<Admin> {
                             ),
                             DataCell(
                               IconButton(
-                                onPressed: () => _editUser(user),
+                                onPressed: () => _editUser(admin),
                                 icon: const Icon(Icons.edit, color: Color(0xffea6238)),
                               ),
                             ),
                             DataCell(
                               IconButton(
-                                onPressed: () => _toggleAccess(user),
+                                onPressed: () => _toggleAccess(admin),
                                 icon: const Icon(Icons.remove_circle_outline, color: Color(0xffea6238)),
                               ),
                             ),
