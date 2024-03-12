@@ -241,26 +241,20 @@ class _HomepageState extends State<Homepage> {
                       child: Row(
                         children: [
                           SizedBox(
-                            width: 400,
-                            height: 50,
+                            width: MediaQuery.of(context).size.width * 0.28,
+                            height: 30,
                             child: TextField(
-                              controller: _searchController,
                               decoration: InputDecoration(
-                                hintText: "Enter Vehicle Capacity,Vehicle Number",
-                                hintStyle: const TextStyle(color: Colors.grey),
-                                fillColor: Colors.grey.withOpacity(0.5),
+                                hintText: "Enter Name, Email, phone, Role",
+                                hintStyle: TextStyle(color: Colours.black,fontSize: 15,),
+                                fillColor: Colors.grey[300],
                                 filled: true,
-                                suffixIcon: IconButton(
-                                    onPressed: () {
-                                      _searchVehicles(_searchController.text);
-                                    },
-                                    icon: const Icon(Icons.search_rounded)),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(40),
-                                  borderSide: const BorderSide(
-                                    color: Colors.transparent,
-                                  ),
+                                suffixIcon: const Icon(Icons.search_rounded),
+                                border: OutlineInputBorder( // Specify border here
+                                  // Adjust border radius as needed
+                                  borderSide: BorderSide.none,
                                 ),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10.0), // Adjust content padding to ensure text appears inside the border
                               ),
                             ),
                           ),

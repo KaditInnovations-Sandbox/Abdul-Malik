@@ -5,6 +5,7 @@ import 'package:tec_admin/Data/Models/Admin.dart';
 import 'package:tec_admin/Data/Models/Presentvehicle.dart';
 import 'package:tec_admin/Data/Repositories/Admin_repo.dart';
 import 'package:tec_admin/Data/Repositories/Present_vehcile_repositories.dart';
+import 'package:tec_admin/Presentation/widgets/AddSchedule.dart';
 import 'package:tec_admin/Presentation/widgets/Add_passenger.dart';
 import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 
@@ -79,7 +80,7 @@ class _SheduleState extends State<Shedule> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const AddPassengerDialog();
+        return const AddScheduleDialog();
       },
     );
   }

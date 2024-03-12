@@ -17,16 +17,19 @@ class Servicepage extends StatefulWidget {
 }
 
 class _ServicepageState extends State<Servicepage> {
+
   List<Admin> users = [];
   bool isLoading = false;
   final int _rowsPerPage = 10;
   int _pageIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  late List<bool> _switchStates;
+
 
   @override
   void initState() {
     super.initState();
-    // Initialize current date and time
+    _switchStates = List.filled(users.length, false);
     _fetchData();
     _searchController.addListener(() {
       _filterVehicles(_searchController.text);
@@ -62,6 +65,7 @@ class _ServicepageState extends State<Servicepage> {
 
     setState(() {
       users = fetchedUsers;
+      _switchStates = List.filled(fetchedUsers.length, false);
       isLoading = false;
     });
 
@@ -116,9 +120,13 @@ class _ServicepageState extends State<Servicepage> {
       print('Error removing vehicle access: $error');
     }
   }
+  bool _isSwitched = false;
+
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: isLoading
@@ -196,9 +204,237 @@ class _ServicepageState extends State<Servicepage> {
               ),
             ),
           ),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(20.0),
+                    child: DataTable(
+                      columnSpacing: 5.0,
+                      headingRowColor: MaterialStateProperty.resolveWith(
+                              (states) => Colours.Presentvehicletabletop),
+                      headingTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12, // Adjust heading font size
+                      ),
+                      headingRowHeight: 50.0,
+                      dataRowHeight: 50.0,
+                      dividerThickness: 0,
+                      dataTextStyle: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 11,
+                      ),
+                      columns: const [
+
+                        DataColumn(
+                          label: Text(
+                            'Date',
+                            textAlign: TextAlign.center, // Center align the heading
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Route ID',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Pickup up',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Drop',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'No.of Days',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Start Time',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'End Time',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Vehicle',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Passengers',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Stops',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Created at',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Allow Booking',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Edit',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Remove Access',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                      rows: users
+                          .skip(_pageIndex * _rowsPerPage)
+                          .take(_rowsPerPage)
+                          .toList()
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                        final int index = entry.key + (_pageIndex * _rowsPerPage);
+                        final Admin admin = entry.value;
+                        final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
+                        return DataRow(
+                          // selected: _selectedRows.contains(user),
+                          // onSelectChanged: (isSelected) {
+                          //   setState(() {
+                          //     if (isSelected ?? false) {
+                          //       _selectedRows.add(user);
+                          //     } else {
+                          //       _selectedRows.remove(user);
+                          //     }
+                          //   });
+                          // },
+                          color: MaterialStateProperty.all(color),
+                          cells: [
+                            DataCell(
+                              Text("06/04/2024"),
+                            ),
+                            DataCell(
+                                TextButton(
+                                    onPressed: (){},
+                                    child: Text("KADTN${index + 0}0${index + 1}",
+                                      style: TextStyle(color: Colours.orange,fontSize: 12),
+                                    )
+                                )
+                            ),
+                            DataCell(
+                              Text(
+                                "Pickup",
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                'Drop',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Text("${index + 7}"),
+                            ),
+                            DataCell(
+                              Text("0${index +1}:00"),
+                            ),
+                            DataCell(
+                              Text(
+                                "0${index +3}:00",
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                "SPR${index +2}${index +1}${index +4}",
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Text('${index +1}00'),
+                            ),
+
+                            DataCell(
+                              Text(
+                                "Stop 1 ,Stop 2",
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                "0${index +2}/04/2024",
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Transform.scale(
+                                scale : 0.5,
+                                child: Switch(
+                                  value: _switchStates[index], // Use the variable to manage the switch state
+                                  onChanged: (newValue) {
+                                    // Update the variable when the switch is toggled
+                                    setState(() {
+                                      _switchStates[index] = newValue;
+                                    });
+                                  },
+                                  activeColor: Colours.green,
+                                  inactiveThumbColor: Colours.grey,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              IconButton(
+                                onPressed: (){},
+                                icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
+                              ),
+                            ),
+                            DataCell(
+                              IconButton(
+                                onPressed: () {},
+                                icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
-
   }
 }

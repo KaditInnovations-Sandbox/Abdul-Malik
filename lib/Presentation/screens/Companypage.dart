@@ -1,25 +1,15 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Data/Models/Companymodel.dart';
+import 'package:tec_admin/Data/Repositories/Company_repo.dart';
 import 'package:tec_admin/Presentation/screens/Companydetails.dart';
 import 'package:tec_admin/Presentation/widgets/AddCompany.dart';
-import 'package:tec_admin/Presentation/widgets/Addadmin.dart';
+import 'package:tec_admin/Presentation/widgets/EditCompany.dart';
 import '../../Utills/date_time_utils.dart';
-
-class User {
-  String firstName;
-  String lastName;
-  String phoneNumber;
-  String role;
-
-  User({
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    required this.role,
-  });
-}
 
 enum FilterOption {
   all,
@@ -35,7 +25,9 @@ class Company extends StatefulWidget {
 }
 
 class _CompanyState extends State<Company> {
-  List<User> users = [];
+  final CompanyRepository _repository = CompanyRepository();
+  List<Companymodel> _originalCompany = [];
+  List<Companymodel> _filteredCompany = [];
   bool isLoading = false;
   bool showCompanyDetailsPage = false;
   late String companyName;
@@ -44,6 +36,7 @@ class _CompanyState extends State<Company> {
   late Timer _timer;
   final int _rowsPerPage = 20;
   int _pageIndex = 0;
+  FilterOption _selectedFilter = FilterOption.all;
 
   @override
   void initState() {
@@ -80,7 +73,7 @@ class _CompanyState extends State<Company> {
   }
 
   int _calculateTotalPages() {
-    return (users.length / _rowsPerPage).ceil();
+    return (_filteredCompany.length / _rowsPerPage).ceil();
   }
 
   Future<void> _refreshData() async {
@@ -88,26 +81,14 @@ class _CompanyState extends State<Company> {
   }
 
   Future<void> _fetchData() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
+      final vehicles = await _repository.fetchVehicles();
       setState(() {
-        isLoading = true;
-      });
-
-      final response = await Dio().get('http://localhost:8081/travelease/Admin');
-
-      List<User> apiUsers = (response.data as List<dynamic>).map((userData) {
-        return User(
-          firstName: userData['admin_first_name'].toString(),
-          lastName: userData['admin_last_name'].toString(),
-          phoneNumber: userData['admin_phone'].toString(),
-          role: userData['admin_email'].toString(),
-        );
-      }).toList();
-      print("Fetch Data Successful");
-      apiUsers.sort((a, b) => a.firstName.compareTo(b.firstName));
-
-      setState(() {
-        users = apiUsers;
+        _originalCompany = vehicles;
+        _applyFilter(_selectedFilter);
       });
     } catch (error) {
       print('Error fetching data: $error');
@@ -118,30 +99,87 @@ class _CompanyState extends State<Company> {
     }
   }
 
-  void _editUser(User user) {}
+  void _editCompanymodel(Companymodel Company) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditCompanyDialog(
+          companyId: Company.Companyid,
+          companyname: Company.Companyname,
+          companyemail: Company.Companyemail,
+          companyphone: Company.Companyphone,
+          companypoc: Company.Companypoc,
+          companystart: Company.Companystart,
+          companyend: Company.Companyend,
+        );
+      },
+    );
+  }
 
-  void _toggleAccess(User user) {}
-
-  void _filterUsers(FilterOption filterOption) {
-    setState(() {
-      switch (filterOption) {
-        case FilterOption.all:
-        // Show all users
-        // No need to modify the 'users' list here
-          break;
-        case FilterOption.active:
-        // Show active users
-          users = users.where((user) => user.role.toLowerCase() == 'active').toList();
-          break;
-        case FilterOption.inactive:
-        // Show inactive users
-          users = users.where((user) => user.role.toLowerCase() == 'inactive').toList();
-          break;
+  Future<void> _toggleAccess(Companymodel Company) async {
+    try {
+      final response = await Dio().delete(
+        'http://localhost:8081/travelease/Company',
+        data: {
+          "company_name" : '${Company.Companyname}'
+        },
+      );
+      if (response.statusCode == 200) {
+        // Handle success, such as updating UI or showing a message
+        print('Company access removed successfully');
+      } else {
+        // Handle error or failure response
+        print('Failed to remove vehicle access');
       }
+    } catch (error) {
+      // Handle Dio error
+      print('Error removing vehicle access: $error');
+    }
+  }
+
+  Future<void> _grandAccess(Companymodel Company) async {
+    try {
+      final response = await Dio().put(
+        'http://localhost:8081/travelease/BindCompany',
+        data: {
+          "company_name" : '${Company.Companyname}'
+        },
+      );
+      if (response.statusCode == 200) {
+        // Handle success, such as updating UI or showing a message
+        print('Company access granted successfully');
+      } else {
+        // Handle error or failure response
+        print('Failed to grant vehicle access');
+      }
+    } catch (error) {
+      // Handle Dio error
+      print('Error granting vehicle access: $error');
+    }
+  }
+
+  void _filter_company(FilterOption filterOption) {
+    setState(() {
+      _selectedFilter = filterOption;
+      _applyFilter(filterOption);
     });
   }
 
-  void _addUser() {
+  void _applyFilter(FilterOption filterOption) {
+    switch (filterOption) {
+      case FilterOption.all:
+        _filteredCompany = List.from(_originalCompany);
+        break;
+      case FilterOption.active:
+        _filteredCompany = _originalCompany.where((company) => company.status).toList();
+        break;
+      case FilterOption.inactive:
+        _filteredCompany = _originalCompany.where((company) => !company.status).toList();
+        break;
+    }
+  }
+
+  void _addCompanymodel() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -175,15 +213,13 @@ class _CompanyState extends State<Company> {
           centerTitle: true,
           backgroundColor: Colours.black,
           title: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(currentDate, style: const TextStyle(fontSize: 15, color: Colors.white)),
-                  Text(
-                    "${currentTime}(SGT)",
-                    style: const TextStyle(fontSize: 15, color: Colors.white),
-                  ),
+                  Text(currentDate, style: const TextStyle(fontSize: 15, color: Colours.white)),
+                  Text("${currentTime}(SGT)", style: const TextStyle(fontSize: 15, color: Colours.white)),
                 ],
               ),
             ],
@@ -203,7 +239,7 @@ class _CompanyState extends State<Company> {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: () => _addUser(),
+                  onPressed: () => _addCompanymodel(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colours.orange,
                     foregroundColor: Colours.white,
@@ -213,47 +249,59 @@ class _CompanyState extends State<Company> {
                 const SizedBox(width: 26),
               ],
             ),
-
           ],
         ),
         body: isLoading
-            ? LinearProgressIndicator(
-          backgroundColor: Colors.grey[200],
-          valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
+            ? Shimmer.fromColors(
+          baseColor: Colors.grey[200]!,
+          highlightColor: Colours.Presentvehicletabletop,
+          child: Container(
+            height: 4.0, // Adjust the height of the shimmer effect
+            color: Colors.white,
+          ),
         )
             : Column(
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 10.0),
               child: Container(
-                color: Colors.white,
+                color: Colours.white,
                 child: Row(
                   children: [
-                    IconButton(onPressed: () => _refreshData(), icon: const Icon(Icons.refresh)),
-                    SizedBox(
-                      width: 600,
-                      height: 50,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "Enter Name, Email, phone, Role",
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          fillColor: Colors.grey.withOpacity(0.5),
-                          filled: true,
-                          suffixIcon: const Icon(Icons.search_rounded),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(40),
-                            borderSide: const BorderSide(
-                              color: Colors.transparent,
+                    Tooltip(
+                      message: 'Refresh', // Tooltip message to display when hovering
+                      child: IconButton(
+                        onPressed: () => _refreshData(),
+                        icon: const Icon(Icons.refresh),
+                      ),
+                    ),
+                    Tooltip(
+                      message: "Search Companies",
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.28,
+                        height: 30,
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: "Enter Name, Email, phone, Role",
+                            hintStyle: TextStyle(color: Colours.black,fontSize: 15,),
+                            fillColor: Colors.grey[300],
+                            filled: true,
+                            suffixIcon: const Icon(Icons.search_rounded),
+                            border: OutlineInputBorder( // Specify border here
+                              // Adjust border radius as needed
+                              borderSide: BorderSide.none,
                             ),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10.0), // Adjust content padding to ensure text appears inside the border
                           ),
                         ),
                       ),
                     ),
+
                     SizedBox(width: 10,),
                     PopupMenuButton<FilterOption>(
                       onSelected: (FilterOption result) {
                         setState(() {
-                          _filterUsers(result);
+                          _filter_company(result);
                         });
                       },
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<FilterOption>>[
@@ -270,20 +318,28 @@ class _CompanyState extends State<Company> {
                           child: Text('Inactive'),
                         ),
                       ],
-                      icon: const Icon(Icons.view_column_outlined,color: Colours.orange,),
+                      icon: const Icon(Icons.filter_alt,color: Colours.orange,),
                     ),
                     const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back_ios),
-                          onPressed: _pageIndex == 0 ? null : _onPreviousPage,
+                        Tooltip(
+                          message: "Previous Page",
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back_ios),
+                            onPressed: _pageIndex == 0 ? null : _onPreviousPage,
+                          ),
                         ),
-                        Text('${_pageIndex + 1} of ${_calculateTotalPages()}'),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_forward_ios),
-                          onPressed: _pageIndex == (_calculateTotalPages() - 1) ? null : _onNextPage,
+                        Tooltip(
+                            message: "${_pageIndex + 1} of ${_calculateTotalPages()}",
+                            child: Text('${_pageIndex + 1} of ${_calculateTotalPages()}')),
+                        Tooltip(
+                          message: "Next Page",
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_forward_ios),
+                            onPressed: _pageIndex == (_calculateTotalPages() - 1) ? null : _onNextPage,
+                          ),
                         ),
                       ],
                     ),
@@ -299,22 +355,22 @@ class _CompanyState extends State<Company> {
                   width: MediaQuery.of(context).size.width,
                   child: Container(
                     height: MediaQuery.of(context).size.height,
-                    color: Colors.white,
+                    color: Colours.white,
                     padding: const EdgeInsets.all(20.0),
                     child: DataTable(
                       columnSpacing: 5.0,
                       headingRowColor: MaterialStateProperty.resolveWith(
-                            (states) => const Color(0xffea6238),
+                            (states) =>  Colours.orange,
                       ),
                       headingTextStyle: const TextStyle(
-                        color: Colors.white,
+                        color: Colours.white,
                         fontSize: 12, // Adjust heading font size
                       ),
                       headingRowHeight: 50.0,
                       dataRowHeight: 50.0,
                       dividerThickness: 0,
                       dataTextStyle: const TextStyle(
-                        color: Colors.black,
+                        color: Colours.black,
                         fontSize: 11,
                       ),
                       columns: const [
@@ -362,6 +418,12 @@ class _CompanyState extends State<Company> {
                         ),
                         DataColumn(
                           label: Text(
+                            'Status',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
                             'Created at',
                             textAlign: TextAlign.center,
                           ),
@@ -379,9 +441,9 @@ class _CompanyState extends State<Company> {
                           ),
                         ),
                       ],
-                      rows: users.asMap().entries.map((entry) {
+                      rows: _filteredCompany.asMap().entries.map((entry) {
                         final int index = entry.key;
-                        final User user = entry.value;
+                        final Companymodel Company = entry.value;
                         final Color color =
                         index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
                         return DataRow(
@@ -389,52 +451,81 @@ class _CompanyState extends State<Company> {
                           cells: [
                             DataCell(
                               Text(
-                                '${index + 1}',
+                                '${Company.Companyid}',
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            DataCell(TextButton(onPressed: () => _viewCompanyDetails('${user.firstName} ${user.lastName}'),
-                                child: Text("${user.firstName} ${user.lastName}",
+                            DataCell(TextButton(onPressed: () => _viewCompanyDetails('${Company.Companyname}'),
+                                child: Text("${Company.Companyname}",
                                   style: const TextStyle(color: Colours.orange, fontSize: 12),
                                   textAlign: TextAlign.center,))),
                             DataCell(
-                              Text(user.role,
-                                textAlign: TextAlign.center,),
+                              Text(Company.Companyemail, textAlign: TextAlign.center,),
                             ),
-                            DataCell(Text(user.phoneNumber,
+                            DataCell(Text(Company.Companyphone,
                               textAlign: TextAlign.center,
                             ),),
                             DataCell(
                               Text(
-                                '1/4/2024',
+                                Company.Companystart,
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
                               Text(
-                                '1/5/2024',
+                                Company.Companyend,
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             DataCell(
                                 Text(
-                                  "${user.firstName} ${user.lastName}",
+                                  Company.Companypoc,
                                   textAlign: TextAlign.center,)
                             ),
                             DataCell(
                               Text(
-                                '28/2/2024',
+                                Company.status ? 'Active' : 'Inactive',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Company.status ? Colours.green : Colors.red,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                DateFormat('MMM dd, yyyy').format(DateTime.parse(Company.Companycreatedat)),
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            DataCell(IconButton(
-                              onPressed: () => _editUser(user),
-                              icon: const Icon(Icons.edit, color: Colours.orange),
-                            )),
-                            DataCell(IconButton(
-                                onPressed: () => _toggleAccess(user),
-                                icon: Icon(Icons.remove_circle_outline, color: Colours.orange,)
-                            )
+
+                            DataCell(
+                              Tooltip(
+                                message:"Edit",
+                                child: IconButton(
+                                  onPressed: Company.status
+                                      ? () => _editCompanymodel(Company)
+                                      : null,
+                                  icon: const Icon(Icons.edit),
+                                  color: Company.status ? Colours.orange : Colours.grey,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              IconButton(
+                                onPressed: () {
+                                  if (Company.status) {
+                                    _toggleAccess(Company);
+                                  } else {
+                                    _grandAccess(Company);
+                                  }
+                                },
+                                icon: Icon(
+                                  Company.status
+                                      ? Icons.remove_circle_outline
+                                      : Icons.add_circle_outline,
+                                  color: Colours.orange,
+                                ),
+                              ),
                             ),
                           ],
                         );

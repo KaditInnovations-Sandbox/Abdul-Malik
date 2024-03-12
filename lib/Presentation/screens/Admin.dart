@@ -148,19 +148,19 @@ class _UserManagementPageState extends State<Adminpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colours.white,
       appBar: AppBar(
         centerTitle: false,
-        backgroundColor: Colors.black,
+        backgroundColor: Colours.black,
         title: Row(
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(currentDate, style: const TextStyle(fontSize: 15, color: Colors.white)),
+                Text(currentDate, style: const TextStyle(fontSize: 15, color: Colours.white)),
                 Text(
                   "${currentTime}(SGT)",
-                  style: const TextStyle(fontSize: 15, color: Colors.white),
+                  style: const TextStyle(fontSize: 15, color: Colours.white),
                 ),
               ],
             ),
@@ -184,7 +184,7 @@ class _UserManagementPageState extends State<Adminpage> {
               ElevatedButton(
                 onPressed: () => _addUser(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffea6238),
+                  backgroundColor: Colours.orange,
                   foregroundColor: Colors.white,
                 ),
                 child: const Text("Add"),
@@ -204,7 +204,7 @@ class _UserManagementPageState extends State<Adminpage> {
           Padding(
             padding: const EdgeInsets.only(top: 10.0),
             child: Container(
-              color: Colors.white,
+              color: Colours.white,
               child: Row(
                 children: [
                   IconButton(onPressed: ()=>_refreshData(), icon: const Icon(Icons.refresh)),
@@ -214,7 +214,7 @@ class _UserManagementPageState extends State<Adminpage> {
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: "Enter Name, Email, phone, Email",
-                        hintStyle: const TextStyle(color: Colors.grey),
+                        hintStyle: const TextStyle(color: Colours.grey),
                         fillColor: Colors.grey.withOpacity(0.5),
                         filled: true,
                         suffixIcon: const Icon(Icons.search_rounded),
@@ -260,17 +260,17 @@ class _UserManagementPageState extends State<Adminpage> {
                     child: DataTable(
                       columnSpacing: 5.0,
                       headingRowColor: MaterialStateProperty.resolveWith(
-                              (states) => const Color(0xffea6238)
+                              (states) => Colours.orange
                       ),
                       headingTextStyle: const TextStyle(
-                        color: Colors.white,
+                        color: Colours.white,
                         fontSize: 12, // Adjust heading font size
                       ),
                       headingRowHeight: 50.0,
                       dataRowHeight: 50.0,
                       dividerThickness: 0,
                       dataTextStyle: const TextStyle(
-                        color: Colors.black,
+                        color: Colours.black,
                         fontSize: 11,
                       ),
                       columns: const [
@@ -348,7 +348,7 @@ class _UserManagementPageState extends State<Adminpage> {
                               ),
                             ),
                             DataCell(
-                              Text("${admin.firstName} ${admin.lastName}"),
+                              Text("${admin.admin_name}"),
                             ),
                             DataCell(
                               Text(

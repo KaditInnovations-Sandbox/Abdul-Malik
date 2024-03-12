@@ -331,7 +331,7 @@ class _PassengerspageState extends State<Passengerspage> {
                               ),
                             ),
                             DataCell(
-                                Text("${admin.firstName} ${admin.lastName}"),
+                                Text("${admin.admin_name}"),
                             ),
                             DataCell(
                               Text(

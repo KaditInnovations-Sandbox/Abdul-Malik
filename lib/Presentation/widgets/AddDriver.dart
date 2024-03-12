@@ -29,20 +29,16 @@ class _AddDriverDialogState extends State<AddDriverDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
       elevation: 0.0,
       backgroundColor: Colors.transparent,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.5,
+            width: MediaQuery.of(context).size.width * 0.4,
             height: MediaQuery.of(context).size.height * 0.9,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20.0),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -50,6 +46,9 @@ class _AddDriverDialogState extends State<AddDriverDialog> {
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
+                ),
+                Center(
+                  child: Text("Add Driver",style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
                 const SizedBox(height: 10),
                 Expanded(

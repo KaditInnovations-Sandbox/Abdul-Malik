@@ -1,6 +1,7 @@
 import 'dart:html';
 
 import 'package:flutter/material.dart';
+import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Presentation/screens/Admin.dart';
 import 'package:tec_admin/Presentation/screens/Companypage.dart';
 import 'package:tec_admin/Presentation/screens/Driverpage.dart';
@@ -113,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const Spacer(),
                 IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.logout, color: Color(0xffea6238)),
+                  icon: const Icon(Icons.logout, color: Colours.orange),
                 ),
                 const SizedBox(width: 9),
               ],
@@ -140,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildNavItem(String title, int index) {
     return Material(
-      color: _selectedIndex == index ? Colors.black : null,
+      color: _selectedIndex == index ? Colours.black : null,
       child: InkWell(
         onTap: () => _onNavItemTapped(index),
         onTapCancel: () {
@@ -163,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
             border: _selectedIndex == index
                 ? const Border(
               top: BorderSide(
-                color: Color(0xffea6238),
+                color: Colours.orange,
                 width: 3,
               ),
             )
@@ -173,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Text(
             title,
             style: TextStyle(
-              color: _selectedIndex == index ? Colors.white : Colors.black,
+              color: _selectedIndex == index ? Colors.white : Colours.black,
               fontWeight: _selectedIndex == index ? FontWeight.bold : FontWeight.normal,
             ),
           ),

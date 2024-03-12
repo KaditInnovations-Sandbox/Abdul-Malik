@@ -4,13 +4,14 @@ import 'package:tec_admin/Data/Models/Presentvehicle.dart';
 class PresentVehicleRepository {
   Future<List<PresentVehicle>> fetchVehicles() async {
     try {
-      final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
+      final response = await Dio().get('http://localhost:8081/travelease/Vehicle');
       List<PresentVehicle> vehicles = (response.data as List<dynamic>).map((vehicleData) {
         return PresentVehicle(
           vehicleid: vehicleData['vehicle_id'].toString(),
           vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
           vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registered: vehicleData['vehicle_registered'].toString(),
+          registered: vehicleData['vehicle_created_at'].toString(),
+          status: vehicleData['vehicle_is_active'],
         );
       }).toList();
 

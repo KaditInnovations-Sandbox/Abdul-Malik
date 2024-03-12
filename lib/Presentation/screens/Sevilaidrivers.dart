@@ -111,7 +111,7 @@ class _VehicleManagementPageState extends State<Sevilaidrivers> {
           vehicleid: vehicleData['vehicle_id'].toString(),
           vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
           vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registered: vehicleData['vehicle_registered'].toString(),
+          registered: vehicleData['vehicle_registered'].toString(), status: vehicleData['vehicle_is_active'] ,
         );
       }).toList();
       print("Fetch Data Successful");

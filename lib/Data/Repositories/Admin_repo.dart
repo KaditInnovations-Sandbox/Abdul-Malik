@@ -11,12 +11,13 @@ class AdminRepository {
         return Admin(
           firstName: userData['admin_first_name'].toString(),
           lastName: userData['admin_last_name'].toString(),
+          admin_name: userData['admin_name'].toString(),
           phoneNumber: userData['admin_phone'].toString(),
           email: userData['admin_email'].toString(),
         );
       }).toList();
 
-      admins.sort((a, b) => a.firstName.compareTo(b.firstName));
+      admins.sort((a, b) => a.admin_name.compareTo(b.admin_name));
       return admins;
     } catch (error) {
       print('Error fetching admins: $error');

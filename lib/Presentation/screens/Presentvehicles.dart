@@ -66,23 +66,6 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
     final now = DateTime.now();
     currentDate = DateFormat('MMM dd, yyyy').format(now);
   }
-
-  void _onPreviousPage() {
-    setState(() {
-      _pageIndex = (_pageIndex - 1).clamp(0, (_calculateTotalPages() - 1));
-    });
-  }
-
-  void _onNextPage() {
-    setState(() {
-      _pageIndex = (_pageIndex + 1).clamp(0, (_calculateTotalPages() - 1));
-    });
-  }
-
-  int _calculateTotalPages() {
-    return (_vehicles.length / _rowsPerPage).ceil();
-  }
-
   Future<void> _fetchData() async {
     setState(() {
       isLoading = true;
@@ -100,6 +83,24 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
       });
     }
   }
+
+  void _onPreviousPage() {
+    setState(() {
+      _pageIndex = (_pageIndex - 1).clamp(0, (_calculateTotalPages() - 1));
+    });
+  }
+
+  void _onNextPage() {
+    setState(() {
+      _pageIndex = (_pageIndex + 1).clamp(0, (_calculateTotalPages() - 1));
+    });
+  }
+
+  int _calculateTotalPages() {
+    return (_vehicles.length / _rowsPerPage).ceil();
+  }
+
+
 
   void _editVehicle(PresentVehicle vehicle) {
     showDialog(
@@ -146,54 +147,12 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
     }).toList();
   }
 
-  void _addVehicle() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const AddVehicleDialog();
-      },
-    );
-  }
 
   Future<void> _refreshData() async {
     _fetchData();
   }
-  Future<void> _downloaddata() async {
-    await _fetchData(); // Fetch data from the server
 
-    // Generate CSV data
-    String csvData = _generateCsvData(_vehicles);
 
-    // Initiate download
-    _downloadCsv(csvData);
-
-  }
-
-  String _generateCsvData(List<PresentVehicle> users) {
-    String csvData = 'Vehicle ID,Vehicle Capacity,Vehicle Number,Registered At\n';
-    for (var vehicle in _vehicles) {
-      csvData += '${vehicle.vehicleid},${vehicle.vehiclecapacity},${vehicle.vehiclenumber},${vehicle.registered}\n';
-    }
-    return csvData;
-  }
-
-  void _downloadCsv(String csvData) {
-    // Create a Blob containing the CSV data
-    Blob blob = Blob([csvData], 'text/csv');
-
-    // Create a URL for the Blob
-    String url = Url.createObjectUrlFromBlob(blob);
-
-    // Create a link element
-    AnchorElement anchor = AnchorElement(href: url)
-      ..setAttribute('download', 'admin_data.csv');
-
-    // Simulate a click to initiate the download
-    anchor.click();
-
-    // Revoke the URL to free up memory
-    Url.revokeObjectUrl(url);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -311,6 +270,12 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
                         ),
                         DataColumn(
                           label: Text(
+                            'Status',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
                             'Created at',
                             textAlign: TextAlign.center,
                           ),
@@ -364,6 +329,15 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
                               Text(
                                 vehicle.vehiclenumber,
                                 textAlign: TextAlign.center,
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                vehicle.status ? 'Active' : 'Inactive',
+                                textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: vehicle.status ? Colors.green : Colors.red,
+                                  )
                               ),
                             ),
                             DataCell(

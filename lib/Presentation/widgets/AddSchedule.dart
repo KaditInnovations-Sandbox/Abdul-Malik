@@ -3,24 +3,34 @@ import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Data/Models/AddVehicle.dart';
 import 'package:tec_admin/Data/Repositories/Add_vehcle_repository.dart';
 
-class AddPassengerDialog extends StatefulWidget {
-  const AddPassengerDialog({super.key});
+class AddScheduleDialog extends StatefulWidget {
+  const AddScheduleDialog({super.key});
 
   @override
-  State<AddPassengerDialog> createState() => _AddPassengerDialogState();
+  State<AddScheduleDialog> createState() => _AddScheduleDialog();
 }
 
-class _AddPassengerDialogState extends State<AddPassengerDialog> {
+class _AddScheduleDialog extends State<AddScheduleDialog> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _capacityController = TextEditingController();
-  final TextEditingController _numberController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
   final VehicleRepository _repository = VehicleRepository();
 
+  // Dropdown options
+  List<String> vehicleNumbers = ['SPR45', 'SPR56', 'SPR67', 'SPR78', 'SPR89'];
+  List<String> vehicleCapacities = ['VAN20', 'BUS30', 'BUS40', 'BUS50', 'BUS60'];
+  List<String> driverName = ['Abdul Malik', 'Samynathan','Boopathi','Sudalaimani'];
+  List<String> routeid = ['KDTN101', 'KDTN102', 'KDTN103',];
+
+  String? selectedVehicleNumber;
+  String? selectedVehicleCapacity;
+  String? selecteddriverName;
+  String? selectedrouteid;
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-
       elevation: 0.0,
       backgroundColor: Colors.transparent,
       child: Center(
@@ -28,7 +38,7 @@ class _AddPassengerDialogState extends State<AddPassengerDialog> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.4,
-            height: MediaQuery.of(context).size.height * 1,
+            height: MediaQuery.of(context).size.height * 0.9,
             decoration: BoxDecoration(
               color: Colors.white,
             ),
@@ -40,7 +50,7 @@ class _AddPassengerDialogState extends State<AddPassengerDialog> {
                   icon: const Icon(Icons.close),
                 ),
                 Center(
-                  child: Text("Add Passenger",style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: Text("Add Schdule",style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
                 const SizedBox(height: 10),
                 Expanded(
@@ -54,153 +64,175 @@ class _AddPassengerDialogState extends State<AddPassengerDialog> {
                           children: [
                             Row(
                               children: [
-                                const Text("Passengers Name"),
-                                const SizedBox(width: 65),
+                                const Text("Company Name"),
+                                const SizedBox(width: 45),
                                 Expanded(
                                   child: _buildInputField(
                                     hintText: '',
-                                    controller: _capacityController,
+                                    controller: _nameController,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Passengers is required';
+                                        return 'Company Name is required';
                                       }
                                       RegExp regex = RegExp(r'^[a-zA-Z]');
                                       if (!regex.hasMatch(value)) {
                                         return 'It Must be Alphabetical Letters';
                                       }
                                       return null;
-                                      return null;
                                     },
                                   ),
                                 ),
-                      
-                      
                               ],
                             ),
                             SizedBox(height: 21,),
                             Row(
                               children: [
-                                const Text("Email Address"),
+                                const Text("Route Id"),
                                 const SizedBox(width: 90),
                                 Expanded(
-                                  child: _buildInputField(
-                                    hintText: '',
-                                    controller: _numberController,
+                                  child: DropdownButtonFormField<String>(
+                                    value: selectedrouteid,
+                                    items: routeid.map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedrouteid = value;
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                    ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Email Address is required';
-                                      }
-                                      RegExp regex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                                      if (!regex.hasMatch(value)) {
-                                        return 'Email Format is Missing';
+                                        return 'Vehicle Capacity is required';
                                       }
                                       return null;
                                     },
                                   ),
                                 ),
-                      
-                      
                               ],
                             ),
                             SizedBox(height: 21,),
                             Row(
                               children: [
-                                const Text("Phone Number"),
-                                const SizedBox(width: 90),
+                                const Text("Passengers Count"),
+                                const SizedBox(width: 30),
                                 Expanded(
                                   child: _buildInputField(
                                     hintText: '',
-                                    controller: _capacityController,
+                                    controller: _phoneNumberController,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Mobile Number  is required';
+                                        return 'Mobile Number is required';
                                       }
-                                      RegExp regex = RegExp(r'^d{10}$');
+                                      RegExp regex = RegExp(r'^\d{10}$');
                                       if (!regex.hasMatch(value)) {
                                         return 'Enter Valid Phone Number';
                                       }
                                       return null;
-                                      return null;
                                     },
                                   ),
                                 ),
-                      
-                      
                               ],
                             ),
                             SizedBox(height: 21,),
                             Row(
                               children: [
-                                const Text("Location"),
-                                const SizedBox(width: 125),
+                                const Text("Vehicle Capacity"),
+                                const SizedBox(width: 40),
                                 Expanded(
-                                  child: _buildInputField(
-                                    hintText: '',
-                                    controller: _numberController,
+                                  child: DropdownButtonFormField<String>(
+                                    value: selectedVehicleCapacity,
+                                    items: vehicleCapacities.map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedVehicleCapacity = value;
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                    ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Location is required';
-                                      }
-                                      RegExp regex = RegExp(r'^[a-zA-Z]$');
-                                      if (!regex.hasMatch(value)) {
-                                        return 'Enter Valid Location';
+                                        return 'Vehicle Capacity is required';
                                       }
                                       return null;
                                     },
                                   ),
                                 ),
-                      
-                      
                               ],
                             ),
                             SizedBox(height: 21,),
                             Row(
                               children: [
-                                const Text("Stop ID"),
-                                const SizedBox(width: 135),
+                                const Text("Vehicle Number"),
+                                const SizedBox(width: 40),
                                 Expanded(
-                                  child: _buildInputField(
-                                    hintText: '',
-                                    controller: _numberController,
+                                  child: DropdownButtonFormField<String>(
+                                    value: selectedVehicleNumber,
+                                    items: vehicleNumbers.map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedVehicleNumber = value;
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                    ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Stop ID is required';
-                                      }
-                                      RegExp regex = RegExp(r'^[a-zA-Z]{5}\d{4}$');
-                                      if (!regex.hasMatch(value)) {
-                                        return '(e.g., ABCD1234)';
+                                        return 'Vehicle Number is required';
                                       }
                                       return null;
                                     },
                                   ),
                                 ),
-                      
-                      
                               ],
                             ),
                             SizedBox(height: 21,),
                             Row(
                               children: [
-                                const Text("Route ID"),
-                                const SizedBox(width: 125),
+                                const Text("Driver Name"),
+                                const SizedBox(width: 60),
                                 Expanded(
-                                  child: _buildInputField(
-                                    hintText: '',
-                                    controller: _numberController,
+                                  child: DropdownButtonFormField<String>(
+                                    value: selecteddriverName,
+                                    items: driverName.map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selecteddriverName = value;
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                    ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Route ID  is required';
-                                      }
-                                      RegExp regex = RegExp(r'^[a-zA-Z]{5}\d{5}$');
-                                      if (!regex.hasMatch(value)) {
-                                        return '(e.g., ABCDE12345)';
+                                        return 'Driver Name is required';
                                       }
                                       return null;
                                     },
                                   ),
                                 ),
-                      
-                      
                               ],
                             ),
                             const SizedBox(height: 10),
@@ -219,17 +251,6 @@ class _AddPassengerDialogState extends State<AddPassengerDialog> {
                                 style: TextStyle(fontSize: 16, color: Colors.white),
                               ),
                             ),
-                            SizedBox(height: 10,),
-                            Center(
-                              child: TextButton(onPressed: (){}, child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.cloud_upload_outlined,color: Colours.grey,),
-                                  SizedBox(width: 5,),
-                                  Text("Drop Your Files Here",style: TextStyle(color: Colours.grey),)
-                                ],
-                              )),
-                            )
                           ],
                         ),
                       ),
@@ -243,9 +264,14 @@ class _AddPassengerDialogState extends State<AddPassengerDialog> {
       ),
     );
   }
+
   void _submitData() async {
     try {
-      final Vehicle vehicle = Vehicle(capacity: _capacityController.text, number: _numberController.text);
+      final Vehicle vehicle = Vehicle(
+
+        capacity: selectedVehicleCapacity!,
+        number: selectedVehicleNumber!,
+      );
       await _repository.addVehicle(vehicle);
       Navigator.of(context).pop();
     } catch (e) {
