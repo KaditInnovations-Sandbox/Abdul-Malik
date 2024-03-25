@@ -1,11 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Data/Models/AddCompany.dart';
 import 'package:tec_admin/Data/Repositories/Add_Company_repo.dart';
 import 'package:universal_html/html.dart' as html;
-
-
 
 class AddCompanyDialog extends StatefulWidget {
   const AddCompanyDialog({Key? key}) : super(key: key);
@@ -15,11 +14,6 @@ class AddCompanyDialog extends StatefulWidget {
 }
 
 class _AddCompanyDialogState extends State<AddCompanyDialog> {
-
-
-
-  bool _allDaysSelected = false;
-
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _startdateController = TextEditingController();
   final TextEditingController _enddateController = TextEditingController();
@@ -28,6 +22,7 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
   final TextEditingController _companyephoneController = TextEditingController();
   final TextEditingController _companyepocController = TextEditingController();
   final CompanyRepository _repository = CompanyRepository();
+  String _selectedFileName = '';
 
   DateTime? _startDate;
   DateTime? _endDate;
@@ -43,32 +38,50 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
-          _startdateController.text = '${_startDate!.day.toString().padLeft(2, '0')}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.year}';
+          _startdateController.text =
+              '${_startDate!.day.toString().padLeft(2, '0')}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.year}';
         } else {
           _endDate = picked;
-          _enddateController.text = '${_endDate!.day.toString().padLeft(2, '0')}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.year}';
+          _enddateController.text =
+              '${_endDate!.day.toString().padLeft(2, '0')}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.year}';
         }
       });
     }
   }
 
-
   void _submitData() async {
     try {
-      final Company company = Company(
+      if (_selectedFileName.isNotEmpty) {
+        // File is selected, proceed with file upload
+        var data = FormData.fromMap({
+          'files': [
+            await MultipartFile.fromFile(_selectedFileName, filename: _selectedFileName.split('/').last),
+          ],
+        });
+
+        // await _repository.uploadFile(data); // Assuming you have a method for file upload in your repository
+
+        print('File uploaded: $_selectedFileName');
+        Navigator.of(context).pop();
+      } else {
+        // No file selected, proceed with form validation and sending form data
+        final Company company = Company(
           Companyname: _companynameController.text,
           Companyemail: _companyemailController.text,
           Companyphone: _companyephoneController.text,
           Companypoc: _companyepocController.text,
           Companystart: _startdateController.text,
-          Companyend: _enddateController.text
-      );
-      await _repository.addCompany(company);
-      Navigator.of(context).pop();
+          Companyend: _enddateController.text,
+        );
+        await _repository.addCompany(company);
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       print('Error submitting data: $e');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +96,6 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
             height: MediaQuery.of(context).size.height * 1,
             decoration: BoxDecoration(
               color: Colors.white,
-
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -93,7 +105,10 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                   icon: const Icon(Icons.close),
                 ),
                 Center(
-                  child: Text("Add Company",style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: Text(
+                    "Add Company",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Expanded(
@@ -113,12 +128,13 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                   child: TextFormField(
                                     controller: _companynameController,
                                     decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 12, horizontal: 16),
                                     ),
                                     validator: (value) {
-                                      if (_companynameController == null) {
+                                      if (value!.isEmpty) {
                                         return 'Company Name is  Required';
                                       }
                                       return null;
@@ -127,19 +143,21 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20,),
+                            SizedBox(
+                              height: 20,
+                            ),
                             Row(
                               children: [
                                 const Text("Email"),
                                 const SizedBox(width: 85),
                                 Expanded(
                                   child: TextFormField(
-
                                     controller: _companyemailController,
                                     decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 12, horizontal: 16),
                                     ),
                                     validator: (value) {
                                       if (_startDate == null) {
@@ -151,7 +169,9 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20,),
+                            SizedBox(
+                              height: 20,
+                            ),
                             Row(
                               children: [
                                 const Text("Phone   "),
@@ -160,9 +180,10 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                   child: TextFormField(
                                     controller: _companyephoneController,
                                     decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 12, horizontal: 16),
                                     ),
                                     validator: (value) {
                                       if (_startDate == null) {
@@ -174,7 +195,9 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20,),
+                            SizedBox(
+                              height: 20,
+                            ),
                             Row(
                               children: [
                                 const Text("POC Name         "),
@@ -183,9 +206,10 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                   child: TextFormField(
                                     controller: _companyepocController,
                                     decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 12, horizontal: 16),
                                     ),
                                     validator: (value) {
                                       if (_startDate == null) {
@@ -197,24 +221,29 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20,),
+                            SizedBox(
+                              height: 20,
+                            ),
                             Row(
                               children: [
                                 const Text("Start Date          "),
                                 const SizedBox(width: 18),
                                 Expanded(
                                   child: TextFormField(
-
                                     onTap: () => _selectDate(context, true),
                                     controller: _startdateController,
                                     decoration: InputDecoration(
-                                      prefixIcon: Icon(Icons.calendar_month,color: Colours.grey,),
+                                      prefixIcon: Icon(
+                                        Icons.calendar_month,
+                                        color: Colours.grey,
+                                      ),
                                       hintText: _startDate == null
                                           ? ''
                                           : '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}',
-                                      border: OutlineInputBorder(
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 12, horizontal: 16),
                                     ),
                                     validator: (value) {
                                       if (_startDate == null) {
@@ -226,10 +255,11 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20,),
+                            SizedBox(
+                              height: 20,
+                            ),
                             Row(
                               children: [
-
                                 const Text("End Date            "),
                                 const SizedBox(width: 18),
                                 Expanded(
@@ -237,14 +267,17 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                     onTap: () => _selectDate(context, false),
                                     controller: _enddateController,
                                     decoration: InputDecoration(
-                                      prefixIcon: Icon(Icons.calendar_month,color: Colours.grey,),
+                                      prefixIcon: Icon(
+                                        Icons.calendar_month,
+                                        color: Colours.grey,
+                                      ),
                                       hintText: _endDate == null
                                           ? ''
                                           : '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}',
-                                      border: OutlineInputBorder(
-
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                      border: OutlineInputBorder(),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 12, horizontal: 16),
                                     ),
                                     validator: (value) {
                                       if (_endDate == null) {
@@ -256,27 +289,39 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20,),
+                            SizedBox(
+                              height: 20,
+                            ),
                             // Start Time Field
                             ElevatedButton(
                               onPressed: () {
-                                print('Route ID: ${_companynameController.text}');
-                                print('companyemail Location: ${_companyemailController.text}');
-                                print('companyephone Location: ${_companyephoneController.text}');
-                                print('companyepoc: ${_companyepocController.text}');
-                                print('Start Date: ${_startdateController.text}');
+                                print(
+                                    'Route ID: ${_companynameController.text}');
+                                print(
+                                    'companyemail Location: ${_companyemailController.text}');
+                                print(
+                                    'companyephone Location: ${_companyephoneController.text}');
+                                print(
+                                    'companyepoc: ${_companyepocController.text}');
+                                print(
+                                    'Start Date: ${_startdateController.text}');
                                 print('End Date: ${_enddateController.text}');
-                                if (_formKey.currentState!.validate()) {
+                                if(_selectedFileName!.isNotEmpty){
+                                  _submitData();
+                                }
+                                else if (_formKey.currentState!.validate()) {
                                   _submitData();
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                primary: Colours.orange,
-                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                                backgroundColor: Colours.orange,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 40, vertical: 15),
                               ),
                               child: const Text(
                                 'Add',
-                                style: TextStyle(fontSize: 16, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white),
                               ),
                             ),
                             Center(
@@ -284,8 +329,10 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                   onPressed: () async {
                                     // Check if running on web
                                     if (kIsWeb) {
-                                      html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-                                      uploadInput.accept = 'csv'; // Only accept CSV files
+                                      html.FileUploadInputElement uploadInput =
+                                      html.FileUploadInputElement();
+                                      uploadInput.accept =
+                                      'csv'; // Only accept CSV files
                                       uploadInput.click();
 
                                       uploadInput.onChange.listen((event) {
@@ -293,9 +340,16 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                         if (files != null && files.isNotEmpty) {
                                           final file = files[0];
                                           final fileType = file.type;
-                                          if (fileType == 'text/csv' || fileType == 'application/vnd.ms-excel') {
+                                          if (fileType == 'text/csv' ||
+                                              fileType ==
+                                                  'application/vnd.ms-excel') {
                                             // Handle selected CSV file
-                                            print('Selected CSV file: ${file.name}');
+                                            setState(() {
+                                              // Update state to show selected file name
+                                              _selectedFileName = file.name;
+                                            });
+                                            print(
+                                                'Selected CSV file: ${file.name}');
                                           } else {
                                             // Show alert for invalid file type
                                             showDialog(
@@ -303,7 +357,8 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
                                                   title: Text('Invalid File Type'),
-                                                  content: Text('Please choose a CSV file.'),
+                                                  content: Text(
+                                                      'Please choose a CSV file.'),
                                                   actions: [
                                                     TextButton(
                                                       onPressed: () {
@@ -320,19 +375,27 @@ class _AddCompanyDialogState extends State<AddCompanyDialog> {
                                       });
                                     } else {
                                       // Platform not supported
-                                      print('File picking is not supported on this platform');
+                                      print(
+                                          'File picking is not supported on this platform');
                                     }
                                   },
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.cloud_upload_outlined, color: Colours.grey,),
-                                      SizedBox(width: 5,),
-                                      Text("Drop Your Files Here", style: TextStyle(color: Colours.grey),)
+                                      Icon(
+                                        Icons.cloud_upload_outlined,
+                                        color: Colours.grey,
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        _selectedFileName.isNotEmpty ? _selectedFileName : "Drop Your Files Here",
+                                        style: TextStyle(color: Colours.grey),
+                                      )
                                     ],
                                   ),
-                                )
-
+                                ),
                             )
                           ],
                         ),

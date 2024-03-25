@@ -1,16 +1,16 @@
 class Admin {
-  String firstName;
-  String lastName;
+  String adminid;
   String admin_name;
   String phoneNumber;
   String email;
+  bool status;
 
   Admin({
-    required this.firstName,
-    required this.lastName,
+    required this.adminid,
     required this.admin_name,
     required this.phoneNumber,
     required this.email,
+    required this.status
 
   });
 }

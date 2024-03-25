@@ -5,11 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tec_admin/Constants/Colours.dart';
-import 'package:tec_admin/Data/Models/Removedvehicle.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 import 'package:tec_admin/Data/Repositories/Present_vehcile_repositories.dart';
-import 'package:tec_admin/Data/Repositories/Removed_vehilce_repository.dart';
-import 'package:tec_admin/Presentation/screens/Presentvehicles.dart';
-import 'package:tec_admin/Presentation/screens/Removedvehicles.dart';
 import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
 import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 import 'package:tec_admin/Utills/date_time_utils.dart';
@@ -31,11 +28,7 @@ class VehilceScreen extends StatefulWidget {
 class _VehilceScreenState extends State<VehilceScreen> {
   final PresentVehicleRepository _repository = PresentVehicleRepository();
   List<PresentVehicle> _vehicles = [];
-  final RemovedVehicleRepository _repository2 = RemovedVehicleRepository();
-  List<RemovedVehicle> _vehicles2 = [];
-  final bool _isSelectedAll = false;
   bool isLoading = false;
-  final List<PresentVehicle> _selectedRows = [];
   final int _rowsPerPage = 10;
   int _pageIndex = 0;
   final TextEditingController _searchController = TextEditingController();
@@ -43,30 +36,34 @@ class _VehilceScreenState extends State<VehilceScreen> {
   late String currentTime;
   late String currentDate;
   late Timer _timer;
-  late int _currentTabIndex;
-  late String filename;// Track the current active tab index
+  late String filename;
+  late String _userRole;
 
   @override
   void initState() {
     super.initState();
+    _userRole = _getUserRole() ?? '';
     // Initialize current date and time
     currentTime = DateTimeUtils.getCurrentTime();
     currentDate = DateTimeUtils.getCurrentDate();
-    _currentTabIndex = 0; // Initialize to the first tab
     // Update date and time every second
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 0), (timer) {
       if (mounted) {
         setState(() {
           currentTime = DateTimeUtils.getCurrentTime();
           currentDate = DateTimeUtils.getCurrentDate();
         });
       }
-
     });
     _fetchData();
     _searchController.addListener(() {
       _filterVehicles(_searchController.text);
+
     });
+  }
+
+  String? _getUserRole() {
+    return window.localStorage['user_role']; // Retrieve user role from local storage
   }
 
   @override
@@ -77,28 +74,27 @@ class _VehilceScreenState extends State<VehilceScreen> {
     super.dispose();
   }
 
-
-
   Future<void> _fetchData() async {
+    print(_userRole);
     setState(() {
-      isLoading = true;
+
+      isLoading = true; // Set isLoading to true while fetching data
     });
     try {
       final vehicles = await _repository.fetchVehicles();
       setState(() {
         _vehicles = vehicles;
+        isLoading = false; // Set isLoading back to false after fetching data successfully
       });
     } catch (error) {
       print('Error fetching data: $error');
       setState(() {
-        isLoading = true;
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
+        isLoading = true; // Set isLoading to false if there's an error
       });
     }
   }
+
+
 
   void _addUser() {
     showDialog(
@@ -125,8 +121,6 @@ class _VehilceScreenState extends State<VehilceScreen> {
     return (_vehicles.length / _rowsPerPage).ceil();
   }
 
-
-
   void _editVehicle(PresentVehicle vehicle) {
     showDialog(
       context: context,
@@ -143,10 +137,8 @@ class _VehilceScreenState extends State<VehilceScreen> {
   void _toggleAccess(PresentVehicle vehicle) async {
     try {
       final response = await Dio().delete(
-        'http://localhost:8081/travelease/Vehicle',
-        data: {
-          "vehicle_number" : vehicle.vehiclenumber
-        },
+        '${ApiConstants.baseUrl}/Vehicle',
+        data: {"vehicle_number": vehicle.vehiclenumber},
       );
       if (response.statusCode == 200) {
         // Handle success, such as updating UI or showing a message
@@ -164,10 +156,8 @@ class _VehilceScreenState extends State<VehilceScreen> {
   void _grandAccess(PresentVehicle vehicle) async {
     try {
       final response = await Dio().put(
-        'http://localhost:8081/travelease/BindVehicle',
-        data: {
-          "vehicle_number" : vehicle.vehiclenumber
-        },
+        '${ApiConstants.baseUrl}/BindVehicle',
+        data: {"vehicle_number": vehicle.vehiclenumber},
       );
       if (response.statusCode == 200) {
         // Handle success, such as updating UI or showing a message
@@ -190,11 +180,12 @@ class _VehilceScreenState extends State<VehilceScreen> {
 
   List<PresentVehicle> _searchVehicles(String query) {
     return _vehicles.where((vehicle) {
-      return vehicle.vehiclecapacity.toLowerCase().contains(query.toLowerCase()) ||
+      return vehicle.vehiclecapacity
+              .toLowerCase()
+              .contains(query.toLowerCase()) ||
           vehicle.vehiclenumber.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
-
 
   Future<void> _refreshData() async {
     _fetchData();
@@ -207,10 +198,11 @@ class _VehilceScreenState extends State<VehilceScreen> {
   }
 
   String _generateCsvData(List<dynamic> vehicles, String fileName) {
-    String csvData = 'Vehicle ID,Vehicle Capacity,Vehicle Number,Registered At\n';
+    String csvData =
+        'Vehicle ID,Vehicle Capacity,Vehicle Number,Registered At\n';
     for (var vehicle in vehicles) {
       csvData +=
-      '${vehicle.vehicleid},${vehicle.vehiclecapacity},${vehicle.vehiclenumber},${vehicle.registered}\n';
+          '${vehicle.vehicleid},${vehicle.vehiclecapacity},${vehicle.vehiclenumber},${vehicle.registered}\n';
     }
     return csvData;
   }
@@ -219,15 +211,15 @@ class _VehilceScreenState extends State<VehilceScreen> {
     setState(() {
       switch (filterOption) {
         case FilterOption.all:
-        // Show all _company
-        // No need to modify the '_company' list here
+          // Show all _company
+          // No need to modify the '_company' list here
           break;
         case FilterOption.active:
-        // Show active _company
+          // Show active _company
 
           break;
         case FilterOption.inactive:
-        // Show inactive _company
+          // Show inactive _company
           break;
       }
     });
@@ -242,8 +234,7 @@ class _VehilceScreenState extends State<VehilceScreen> {
 
     // Create a link element
     AnchorElement anchor = AnchorElement(href: url)
-      ..setAttribute('download', 'vehicles.csv' );
-
+      ..setAttribute('download', 'vehicles.csv');
 
     // Simulate a click to initiate the download
     anchor.click();
@@ -271,8 +262,8 @@ class _VehilceScreenState extends State<VehilceScreen> {
                           fontSize: 15, color: Colours.textColor)),
                   Text(
                     "${currentTime}(SGT)",
-                    style: const TextStyle(
-                        fontSize: 15, color: Colours.textColor),
+                    style:
+                        const TextStyle(fontSize: 15, color: Colours.textColor),
                   ),
                 ],
               ),
@@ -296,13 +287,17 @@ class _VehilceScreenState extends State<VehilceScreen> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: () => _addUser(),
+                  icon: const Icon(Icons.add),
+                  label: const Text("Add"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colours.buttonBackground,
-                    foregroundColor: Colours.textColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0), // Adjust the border radius for a square button
+                    ),
+                    backgroundColor: Colours.orange,
+                    foregroundColor: Colours.white,
                   ),
-                  child: const Text("Add"),
                 ),
                 const SizedBox(width: 26),
               ],
@@ -310,252 +305,313 @@ class _VehilceScreenState extends State<VehilceScreen> {
           ],
         ),
         body: isLoading
-            ? Shimmer.fromColors(
-          baseColor: Colors.grey[200]!,
-          highlightColor: Colours.Presentvehicletabletop,
-          child: Container(
-            height: 4.0, // Adjust the height of the shimmer effect
-            color: Colors.white,
-          ),
-        )
+            ? _buildErrorWidget()
             : Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 10.0),
-              child: Container(
-                color: Colors.white,
-                child: Row(
-                  children: [
-                    IconButton(
-                        onPressed: () {
-                          _refreshData();
-                        },
-                        icon: const Icon(Icons.refresh)),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.28,
-                      height: 30,
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: "Enter Name, Email, phone, Role",
-                          hintStyle: TextStyle(color: Colours.black,fontSize: 15,),
-                          fillColor: Colors.grey[300],
-                          filled: true,
-                          suffixIcon: const Icon(Icons.search_rounded),
-                          border: OutlineInputBorder( // Specify border here
-                            // Adjust border radius as needed
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10.0), // Adjust content padding to ensure text appears inside the border
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10,),
-                    PopupMenuButton<FilterOption>(
-                      onSelected: (FilterOption result) {
-                        setState(() {
-                          _filter_company(result);
-                        });
-                      },
-                      itemBuilder: (BuildContext context) => <PopupMenuEntry<FilterOption>>[
-                        const PopupMenuItem<FilterOption>(
-                          value: FilterOption.all,
-                          child: Text('All'),
-                        ),
-                        const PopupMenuItem<FilterOption>(
-                          value: FilterOption.active,
-                          child: Text('Active'),
-                        ),
-                        const PopupMenuItem<FilterOption>(
-                          value: FilterOption.inactive,
-                          child: Text('Inactive'),
-                        ),
-                      ],
-                      icon: const Icon(Icons.view_column_outlined,color: Colours.orange,),
-                    ),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back_ios),
-                          onPressed: _pageIndex == 0 ? null : _onPreviousPage,
-                        ),
-                        Text('${_pageIndex + 1} of ${_calculateTotalPages()}'),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_forward_ios),
-                          onPressed: _pageIndex == (_calculateTotalPages() - 1)
-                              ? null
-                              : _onNextPage,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      width: 15,
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
                     child: Container(
                       color: Colors.white,
-                      padding: const EdgeInsets.all(20.0),
-                      child: DataTable(
-                        columnSpacing: 5.0,
-                        headingRowColor: MaterialStateProperty.resolveWith(
-                                (states) => Colours.Presentvehicletabletop),
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12, // Adjust heading font size
-                        ),
-                        headingRowHeight: 50.0,
-                        dataRowHeight: 50.0,
-                        dividerThickness: 0,
-                        dataTextStyle: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 11,
-                        ),
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'Vehicle ID',
-                              textAlign: TextAlign.center,
+                      child: Row(
+                        children: [
+                          Tooltip(
+                            message:
+                                'Refresh', // Tooltip message to display when hovering
+                            child: IconButton(
+                              onPressed: () => _refreshData(),
+                              icon: const Icon(Icons.refresh),
                             ),
                           ),
-                          DataColumn(
-                            label: Text(
-                              'Vehicle Capacity',
-                              textAlign: TextAlign.center, // Center align the heading
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Vehicle Number',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Status',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Created at',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Edit',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Remove Access',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                        rows: _vehicles
-                            .skip(_pageIndex * _rowsPerPage)
-                            .take(_rowsPerPage)
-                            .toList()
-                            .asMap()
-                            .entries
-                            .map((entry) {
-                          final int index = entry.key + (_pageIndex * _rowsPerPage);
-                          final PresentVehicle vehicle = entry.value;
-                          final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
-                          return DataRow(
-                            // selected: _selectedRows.contains(user),
-                            // onSelectChanged: (isSelected) {
-                            //   setState(() {
-                            //     if (isSelected ?? false) {
-                            //       _selectedRows.add(user);
-                            //     } else {
-                            //       _selectedRows.remove(user);
-                            //     }
-                            //   });
-                            // },
-                            color: MaterialStateProperty.all(color),
-                            cells: [
-                              DataCell(
-                                Text(
-                                  vehicle.vehicleid,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              DataCell(
-                                Text(vehicle.vehiclecapacity),
-                              ),
-                              DataCell(
-                                Text(
-                                  vehicle.vehiclenumber,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                    vehicle.status ? 'Active' : 'Inactive',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: vehicle.status ? Colors.green : Colors.red,
-                                    )
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              DataCell(
-                                IconButton(
-                                  onPressed: vehicle.status
-                                      ? () => _editVehicle(vehicle)
-                                      : null,
-                                  icon: const Icon(Icons.edit),
-                                  color: vehicle.status ? Colours.orange : Colours.grey,
-                                ),
-                              ),
-                              DataCell(
-                                IconButton(
-                                  onPressed: () {
-                                    if (vehicle.status) {
-                                      _toggleAccess(vehicle);
-                                    } else {
-                                      _grandAccess(vehicle);
-                                    }
-                                  },
-                                  icon: Icon(
-                                    vehicle.status
-                                        ? Icons.remove_circle_outline
-                                        : Icons.add_circle_outline,
-                                    color: Colours.orange,
+                          Tooltip(
+                            message: 'Search Vehicle',
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.28,
+                              height: 30,
+                              child: TextField(
+                                controller: _searchController,
+                                decoration: InputDecoration(
+                                  hintText: "Enter Name, Email, phone, Role",
+                                  hintStyle: TextStyle(
+                                    color: Colours.black,
+                                    fontSize: 15,
                                   ),
+                                  fillColor: Colors.grey[300],
+                                  filled: true,
+                                  suffixIcon: const Icon(Icons.search_rounded),
+                                  border: OutlineInputBorder(
+                                    // Specify border here
+                                    // Adjust border radius as needed
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal:
+                                          10.0), // Adjust content padding to ensure text appears inside the border
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          PopupMenuButton<FilterOption>(
+                            onSelected: (FilterOption result) {
+                              setState(() {
+                                _filter_company(result);
+                              });
+                            },
+                            itemBuilder: (BuildContext context) =>
+                                <PopupMenuEntry<FilterOption>>[
+                              const PopupMenuItem<FilterOption>(
+                                value: FilterOption.all,
+                                child: Text('All'),
+                              ),
+                              const PopupMenuItem<FilterOption>(
+                                value: FilterOption.active,
+                                child: Text('Active'),
+                              ),
+                              const PopupMenuItem<FilterOption>(
+                                value: FilterOption.inactive,
+                                child: Text('Inactive'),
+                              ),
+                            ],
+                            icon: const Icon(
+                              Icons.filter_alt,
+                              color: Colours.orange,
+                            ),
+                          ),
+                          const Spacer(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Tooltip(
+                                message: "Previous Page",
+                                child: IconButton(
+                                  icon: const Icon(Icons.arrow_back_ios),
+                                  onPressed:
+                                      _pageIndex == 0 ? null : _onPreviousPage,
+                                ),
+                              ),
+                              Tooltip(
+                                  message:
+                                      "${_pageIndex + 1} of ${_calculateTotalPages()}",
+                                  child: Text(
+                                      '${_pageIndex + 1} of ${_calculateTotalPages()}')),
+                              Tooltip(
+                                message: "Next Page",
+                                child: IconButton(
+                                  icon: const Icon(Icons.arrow_forward_ios),
+                                  onPressed:
+                                      _pageIndex == (_calculateTotalPages() - 1)
+                                          ? null
+                                          : _onNextPage,
                                 ),
                               ),
                             ],
-                          );
-                        }).toList(),
+                          ),
+                          const SizedBox(
+                            width: 15,
+                          )
+                        ],
                       ),
                     ),
                   ),
-                ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          child: Container(
+                            color: Colors.white,
+                            padding: const EdgeInsets.all(20.0),
+                            child: DataTable(
+                              columnSpacing: 5.0,
+                              headingRowColor:
+                                  MaterialStateProperty.resolveWith((states) =>
+                                      Colours.Presentvehicletabletop),
+                              headingTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12, // Adjust heading font size
+                              ),
+                              headingRowHeight: 50.0,
+                              dividerThickness: 0,
+                              dataTextStyle: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 11,
+                              ),
+                              columns:  [
+                                DataColumn(
+                                  label: Text(
+                                    'Vehicle ID',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Vehicle Capacity',
+                                    textAlign: TextAlign
+                                        .center, // Center align the heading
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Vehicle Number',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Status',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Created at',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Edit',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                if (_userRole == 'SUPER_ADMIN') // Conditionally add the Remove Access column
+                                  DataColumn(
+                                    label: Text(
+                                      'Remove Access',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                              ],
+                              rows: _vehicles
+                                  .skip(_pageIndex * _rowsPerPage)
+                                  .take(_rowsPerPage)
+                                  .toList()
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                final int index =
+                                    entry.key + (_pageIndex * _rowsPerPage);
+                                final PresentVehicle vehicle = entry.value;
+                                final Color color = index.isOdd
+                                    ? Colors.grey[300]!
+                                    : Colors.grey[100]!;
+                                return DataRow(
+                                  // selected: _selectedRows.contains(user),
+                                  // onSelectChanged: (isSelected) {
+                                  //   setState(() {
+                                  //     if (isSelected ?? false) {
+                                  //       _selectedRows.add(user);
+                                  //     } else {
+                                  //       _selectedRows.remove(user);
+                                  //     }
+                                  //   });
+                                  // },
+                                  color: MaterialStateProperty.all(color),
+                                  cells: [
+                                    DataCell(
+                                      Text(
+                                        vehicle.vehicleid,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Text(vehicle.vehiclecapacity),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                        vehicle.vehiclenumber,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                          vehicle.status
+                                              ? 'Active'
+                                              : 'Inactive',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: vehicle.status
+                                                ? Colors.green
+                                                : Colors.red,
+                                          )),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                        DateFormat('MMM dd, yyyy').format(
+                                            DateTime.parse(vehicle.registered)),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    DataCell(
+                                      IconButton(
+                                        onPressed: vehicle.status
+                                            ? () => _editVehicle(vehicle)
+                                            : null,
+                                        icon: const Icon(Icons.edit),
+                                        color: vehicle.status
+                                            ? Colours.orange
+                                            : Colours.grey,
+                                      ),
+                                    ),
+                                    if (_userRole == 'SUPER_ADMIN') // Conditionally add the Remove Access button
+                                      DataCell(
+                                        IconButton(
+                                          onPressed: () {
+                                            if (vehicle.status) {
+                                              _toggleAccess(vehicle);
+                                            } else {
+                                              _grandAccess(vehicle);
+                                            }
+                                          },
+                                          icon: Icon(
+                                            vehicle.status
+                                                ? Icons.remove_circle_outline
+                                                : Icons.add_circle_outline,
+                                            color: Colours.orange,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/error.png', // Replace 'error_image.png' with your error illustration image path
+            height: 200,
+            width: 200,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Oops! Something went wrong.',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _refreshData, // Call your refresh data method
+            child: Text('Try Again'),
+          ),
+        ],
       ),
     );
   }

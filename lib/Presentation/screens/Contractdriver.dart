@@ -7,8 +7,13 @@ import 'package:tec_admin/Data/Models/Presentvehicle.dart';
 import 'package:tec_admin/Data/Repositories/Dummy.dart';
 import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
 import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
-
 import 'package:dio/dio.dart';
+
+enum FilterOption {
+  all,
+  active,
+  inactive,
+}
 
 class Contractdrivers extends StatefulWidget {
   const Contractdrivers({Key? key}) : super(key: key);
@@ -22,8 +27,6 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
   bool isLoading = false;
   late String currentTime;
   late String currentDate;
-  final bool _isSelectedAll = false;
-  final List<PresentVehicle> _selectedRows = [];
   List<Dummydata> dummyDrivers = [];
   late Timer _timer;
   final int _rowsPerPage = 10;
@@ -56,7 +59,8 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
     });
 
     // Fetch dummy drivers using the repository
-    dummyDrivers = await DummydataRepository.getDummyDrivers(); // Adjust the method according to your repository implementation
+    dummyDrivers = await DummydataRepository
+        .getDummyDrivers(); // Adjust the method according to your repository implementation
 
     setState(() {
       isLoading = false;
@@ -103,18 +107,22 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
         isLoading = true;
       });
 
-      final response = await Dio().get('http://localhost:8081/travelease/ActiveVehicle');
+      final response =
+          await Dio().get('http://192.168.20.21:8081/travelease/ActiveVehicle');
 
-      List<PresentVehicle> apiVehicles = (response.data as List<dynamic>).map((vehicleData) {
+      List<PresentVehicle> apiVehicles =
+          (response.data as List<dynamic>).map((vehicleData) {
         return PresentVehicle(
           vehicleid: vehicleData['vehicle_id'].toString(),
           vehiclecapacity: vehicleData['vehicle_capacity'].toString(),
           vehiclenumber: vehicleData['vehicle_number'].toString(),
-          registered: vehicleData['vehicle_registered'].toString(), status: vehicleData['vehicle_is_active'],
+          registered: vehicleData['vehicle_registered'].toString(),
+          status: vehicleData['vehicle_is_active'],
         );
       }).toList();
       print("Fetch Data Successful");
-      apiVehicles.sort((a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
+      apiVehicles.sort(
+          (a, b) => int.parse(a.vehicleid).compareTo(int.parse(b.vehicleid)));
 
       setState(() {
         vehicles = apiVehicles;
@@ -126,6 +134,24 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
         isLoading = false;
       });
     }
+  }
+
+  void _filter_company(FilterOption filterOption) {
+    setState(() {
+      switch (filterOption) {
+        case FilterOption.all:
+          // Show all _company
+          // No need to modify the '_company' list here
+          break;
+        case FilterOption.active:
+          // Show active _company
+
+          break;
+        case FilterOption.inactive:
+          // Show inactive _company
+          break;
+      }
+    });
   }
 
   void _editVehicle(PresentVehicle vehicle) {
@@ -168,7 +194,9 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
 
   List<PresentVehicle> _searchVehicles(String query) {
     return vehicles.where((vehicle) {
-      return vehicle.vehiclecapacity.toLowerCase().contains(query.toLowerCase()) ||
+      return vehicle.vehiclecapacity
+              .toLowerCase()
+              .contains(query.toLowerCase()) ||
           vehicle.vehiclenumber.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
@@ -193,299 +221,355 @@ class _VehicleManagementPageState extends State<Contractdrivers> {
       backgroundColor: Colors.white,
       body: isLoading
           ? LinearProgressIndicator(
-        backgroundColor: Colors.grey[200],
-        valueColor: const AlwaysStoppedAnimation<Color>(Colours.Presentvehicletabletop),
-      )
+              backgroundColor: Colors.grey[200],
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  Colours.Presentvehicletabletop),
+            )
           : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: Container(
-              color: Colors.white,
-              child: Row(
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        _refreshData();
-                      },
-                      icon: const Icon(Icons.refresh)),
-                  SizedBox(
-                    width: 600,
-                    height: 50,
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: "Enter Vehicle Capacity,Vehicle Number",
-                        hintStyle: const TextStyle(color: Colors.grey),
-                        fillColor: Colors.grey.withOpacity(0.5),
-                        filled: true,
-                        suffixIcon: IconButton(
-                            onPressed: () {
-                              _searchVehicles(_searchController.text);
-                            },
-                            icon: const Icon(Icons.search_rounded)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(40),
-                          borderSide: const BorderSide(
-                            color: Colors.transparent,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios),
-                        onPressed: _pageIndex == 0 ? null : _onPreviousPage,
-                      ),
-                      Text('${_pageIndex + 1} of ${_calculateTotalPages()}'),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios),
-                        onPressed: _pageIndex == (_calculateTotalPages() - 1)
-                            ? null
-                            : _onNextPage,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  )
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
                   child: Container(
                     color: Colors.white,
-                    padding: const EdgeInsets.all(20.0),
-                    child: DataTable(
-                      columnSpacing: 5.0,
-                      headingRowColor: MaterialStateProperty.resolveWith(
-                              (states) => Colours.Presentvehicletabletop),
-                      headingTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12, // Adjust heading font size
-                      ),
-                      headingRowHeight: 50.0,
-                      dataRowHeight: 50.0,
-                      dividerThickness: 0,
-                      dataTextStyle: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 11,
-                      ),
-                      columns: const [
-                        DataColumn(
-                          label: Text(
-                            'S.No',
-                            textAlign: TextAlign.center,
+                    child: Row(
+                      children: [
+                        Tooltip(
+                          message:
+                              'Refresh', // Tooltip message to display when hovering
+                          child: IconButton(
+                            onPressed: () => _refreshData(),
+                            icon: const Icon(Icons.refresh),
                           ),
                         ),
-                        DataColumn(
-                          label: Text(
-                            'Name',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Email',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Phone Number',
-                            textAlign: TextAlign.center, // Center align the heading
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Vehicle Capacity',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Vehicle Number',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Created at',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Edit',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Remove Access',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                      // rows: vehicles
-                      //     .skip(_pageIndex * _rowsPerPage)
-                      //     .take(_rowsPerPage)
-                      //     .toList()
-                      //     .asMap()
-                      //     .entries
-                      //     .map((entry) {
-                      //   final int index = entry.key + (_pageIndex * _rowsPerPage);
-                      //   final PresentVehicle vehicle = entry.value;
-                      //   final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
-                      //   return DataRow(
-                      //     // selected: _selectedRows.contains(user),
-                      //     // onSelectChanged: (isSelected) {
-                      //     //   setState(() {
-                      //     //     if (isSelected ?? false) {
-                      //     //       _selectedRows.add(user);
-                      //     //     } else {
-                      //     //       _selectedRows.remove(user);
-                      //     //     }
-                      //     //   });
-                      //     // },
-                      //     color: MaterialStateProperty.all(color),
-                      //     cells: [
-                      //       DataCell(
-                      //         Text(
-                      //           vehicle.vehicleid,
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           "Abdul Malik",
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           "Aaa@gmail.com",
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           "9087035132",
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(vehicle.vehiclecapacity),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           vehicle.vehiclenumber,
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         Text(
-                      //           DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
-                      //           textAlign: TextAlign.center,
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         IconButton(
-                      //           onPressed: () => _editVehicle(vehicle),
-                      //           icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
-                      //         ),
-                      //       ),
-                      //       DataCell(
-                      //         IconButton(
-                      //           onPressed: () => _toggleAccess(vehicle),
-                      //           icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
-                      //         ),
-                      //       ),
-                      //     ],
-                      //   );
-                      // }).toList(),
-                      rows: dummyDrivers.map((driver) {
-                        final Color color = dummyDrivers.indexOf(driver).isOdd ? Colors.grey[300]! : Colors.grey[100]!;
-                        return DataRow(
-                          color: MaterialStateProperty.all(color),
-                          cells: [
-                            DataCell(
-                              Text(
-                                driver.id.toString(),
-                                textAlign: TextAlign.center,
+                        Tooltip(
+                          message: 'Search Vehicle',
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.28,
+                            height: 30,
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: "Enter Name, Email, phone, Role",
+                                hintStyle: TextStyle(
+                                  color: Colours.black,
+                                  fontSize: 15,
+                                ),
+                                fillColor: Colors.grey[300],
+                                filled: true,
+                                suffixIcon: const Icon(Icons.search_rounded),
+                                border: OutlineInputBorder(
+                                  // Specify border here
+                                  // Adjust border radius as needed
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        10.0), // Adjust content padding to ensure text appears inside the border
                               ),
                             ),
-                            DataCell(
-                              Text(
-                                driver.name,
-                                textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        PopupMenuButton<FilterOption>(
+                          onSelected: (FilterOption result) {
+                            setState(() {
+                              _filter_company(result);
+                            });
+                          },
+                          itemBuilder: (BuildContext context) =>
+                              <PopupMenuEntry<FilterOption>>[
+                            const PopupMenuItem<FilterOption>(
+                              value: FilterOption.all,
+                              child: Text('All'),
+                            ),
+                            const PopupMenuItem<FilterOption>(
+                              value: FilterOption.active,
+                              child: Text('Active'),
+                            ),
+                            const PopupMenuItem<FilterOption>(
+                              value: FilterOption.inactive,
+                              child: Text('Inactive'),
+                            ),
+                          ],
+                          icon: const Icon(
+                            Icons.filter_alt,
+                            color: Colours.orange,
+                          ),
+                        ),
+                        const Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Tooltip(
+                              message: "Previous Page",
+                              child: IconButton(
+                                icon: const Icon(Icons.arrow_back_ios),
+                                onPressed:
+                                    _pageIndex == 0 ? null : _onPreviousPage,
                               ),
                             ),
-                            DataCell(
-                              Text(
-                                driver.email,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                driver.phoneNumber,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                driver.vehicleCapacity,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                driver.vehicleNumber,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                DateFormat('MMM dd, yyyy').format(driver.createdAt),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              IconButton(
-                                onPressed: () => {},
-                                icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
-                              ),
-                            ),
-                            DataCell(
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
+                            Tooltip(
+                                message:
+                                    "${_pageIndex + 1} of ${_calculateTotalPages()}",
+                                child: Text(
+                                    '${_pageIndex + 1} of ${_calculateTotalPages()}')),
+                            Tooltip(
+                              message: "Next Page",
+                              child: IconButton(
+                                icon: const Icon(Icons.arrow_forward_ios),
+                                onPressed:
+                                    _pageIndex == (_calculateTotalPages() - 1)
+                                        ? null
+                                        : _onNextPage,
                               ),
                             ),
                           ],
-                        );
-                      }).toList(),
-
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        )
+                      ],
                     ),
                   ),
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(20.0),
+                          child: DataTable(
+                            columnSpacing: 5.0,
+                            headingRowColor: MaterialStateProperty.resolveWith(
+                                (states) => Colours.Presentvehicletabletop),
+                            headingTextStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12, // Adjust heading font size
+                            ),
+                            headingRowHeight: 50.0,
+                            dataRowHeight: 50.0,
+                            dividerThickness: 0,
+                            dataTextStyle: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 11,
+                            ),
+                            columns: const [
+                              DataColumn(
+                                label: Text(
+                                  'S.No',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Name',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Email',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Phone Number',
+                                  textAlign: TextAlign
+                                      .center, // Center align the heading
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Vehicle Capacity',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Vehicle Number',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Created at',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Edit',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Remove Access',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                            // rows: vehicles
+                            //     .skip(_pageIndex * _rowsPerPage)
+                            //     .take(_rowsPerPage)
+                            //     .toList()
+                            //     .asMap()
+                            //     .entries
+                            //     .map((entry) {
+                            //   final int index = entry.key + (_pageIndex * _rowsPerPage);
+                            //   final PresentVehicle vehicle = entry.value;
+                            //   final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
+                            //   return DataRow(
+                            //     // selected: _selectedRows.contains(user),
+                            //     // onSelectChanged: (isSelected) {
+                            //     //   setState(() {
+                            //     //     if (isSelected ?? false) {
+                            //     //       _selectedRows.add(user);
+                            //     //     } else {
+                            //     //       _selectedRows.remove(user);
+                            //     //     }
+                            //     //   });
+                            //     // },
+                            //     color: MaterialStateProperty.all(color),
+                            //     cells: [
+                            //       DataCell(
+                            //         Text(
+                            //           vehicle.vehicleid,
+                            //           textAlign: TextAlign.center,
+                            //         ),
+                            //       ),
+                            //       DataCell(
+                            //         Text(
+                            //           "Abdul Malik",
+                            //           textAlign: TextAlign.center,
+                            //         ),
+                            //       ),
+                            //       DataCell(
+                            //         Text(
+                            //           "Aaa@gmail.com",
+                            //           textAlign: TextAlign.center,
+                            //         ),
+                            //       ),
+                            //       DataCell(
+                            //         Text(
+                            //           "9087035132",
+                            //           textAlign: TextAlign.center,
+                            //         ),
+                            //       ),
+                            //       DataCell(
+                            //         Text(vehicle.vehiclecapacity),
+                            //       ),
+                            //       DataCell(
+                            //         Text(
+                            //           vehicle.vehiclenumber,
+                            //           textAlign: TextAlign.center,
+                            //         ),
+                            //       ),
+                            //       DataCell(
+                            //         Text(
+                            //           DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
+                            //           textAlign: TextAlign.center,
+                            //         ),
+                            //       ),
+                            //       DataCell(
+                            //         IconButton(
+                            //           onPressed: () => _editVehicle(vehicle),
+                            //           icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
+                            //         ),
+                            //       ),
+                            //       DataCell(
+                            //         IconButton(
+                            //           onPressed: () => _toggleAccess(vehicle),
+                            //           icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   );
+                            // }).toList(),
+                            rows: dummyDrivers.map((driver) {
+                              final Color color =
+                                  dummyDrivers.indexOf(driver).isOdd
+                                      ? Colors.grey[300]!
+                                      : Colors.grey[100]!;
+                              return DataRow(
+                                color: MaterialStateProperty.all(color),
+                                cells: [
+                                  DataCell(
+                                    Text(
+                                      driver.id.toString(),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      driver.name,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      driver.email,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      driver.phoneNumber,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      driver.vehicleCapacity,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      driver.vehicleNumber,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      DateFormat('MMM dd, yyyy')
+                                          .format(driver.createdAt),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    IconButton(
+                                      onPressed: () => {},
+                                      icon: const Icon(Icons.edit,
+                                          color: Colours.Presentvehiclebutton),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    IconButton(
+                                      onPressed: () {},
+                                      icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                          color: Colours.Presentvehiclebutton),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

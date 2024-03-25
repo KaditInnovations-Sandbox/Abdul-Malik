@@ -3,56 +3,48 @@ import 'package:flutter/material.dart';
 import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Constants/api_constants.dart';
 
-class EditCompanyDialog extends StatefulWidget {
-  final String companyId;
-  final String companyname;
-  final String companyemail;
-  final String companyphone;
-  final String companypoc;
-  final String companystart;
-  final String companyend;
+class EditPassengerDialog extends StatefulWidget {
+  final String passengerId;
+  final String passengername;
+  final String passengeremail;
+  final String passengerphone;
+  final String location;
 
-  const EditCompanyDialog({
+  const EditPassengerDialog({
     Key? key,
-    required this.companyId,
-    required this.companyname,
-    required this.companyemail,
-    required this.companyphone,
-    required this.companypoc,
-    required this.companystart,
-    required this.companyend,
+    required this.passengerId,
+    required this.passengername,
+    required this.passengeremail,
+    required this.passengerphone,
+    required this.location,
   }) : super(key: key);
 
 
 
   @override
-  _EditCompanyDialogState createState() => _EditCompanyDialogState();
+  _EditpassengerDialogState createState() => _EditpassengerDialogState();
 }
 
-class _EditCompanyDialogState extends State<EditCompanyDialog> {
-  late TextEditingController _companyidController;
+class _EditpassengerDialogState extends State<EditPassengerDialog> {
+  late TextEditingController _passengeridController;
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _pocController;
-  late TextEditingController _startController;
-  late TextEditingController _endController;
 
   @override
   void initState() {
     super.initState();
-    _companyidController = TextEditingController(text: widget.companyId);
-    _nameController = TextEditingController(text: widget.companyname);
-    _emailController = TextEditingController(text: widget.companyemail);
-    _phoneController = TextEditingController(text: widget.companyphone);
-    _pocController = TextEditingController(text: widget.companypoc);
-    _startController = TextEditingController(text: widget.companystart);
-    _endController = TextEditingController(text: widget.companyend);
+
+    _nameController = TextEditingController(text: widget.passengername);
+    _emailController = TextEditingController(text: widget.passengeremail);
+    _phoneController = TextEditingController(text: widget.passengerphone);
+    _pocController = TextEditingController(text: widget.location);
   }
 
   @override
   void dispose() {
-    _companyidController.dispose();
+    _passengeridController.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -60,26 +52,21 @@ class _EditCompanyDialogState extends State<EditCompanyDialog> {
   Future<void> _editUser() async {
     try {
       final response = await Dio().put(
-        '${ApiConstants.baseUrl}/Company',
+        '${ApiConstants.baseUrl}/Passenger',
         data: {
-          "company_id": widget.companyId,
-          "company_name" : _nameController.text,
-          "company_email" : _emailController.text,
-          "company_phone" : _phoneController.text,
-          "company_poc" : _pocController.text,
-          "company_start_date" : _startController.text,
-          "company_end_date" : _endController.text,
+          "passenger_id" : widget.passengerId,
+          "passenger_name" : _nameController.text,
+          "passenger_email" : _emailController.text,
+          "passenger_phone" : _phoneController.text,
+          "passenger_location" : _pocController.text,
         },
       );
       if (response.statusCode == 200) {
-        // Handle success, such as updating UI or showing a message
         print('Vehicle updated successfully');
       } else {
-        // Handle error or failure response
         print('Failed to update vehicle');
       }
     } catch (error) {
-      // Handle Dio error
       print('Error updating vehicle: $error');
     }
   }
@@ -124,7 +111,7 @@ class _EditCompanyDialogState extends State<EditCompanyDialog> {
                             const SizedBox(height: 20),
                             Row(
                               children: [
-                                const Text("Company Name   :"),
+                                const Text("Passenger Name   :"),
                                 const SizedBox(width: 40),
                                 Expanded(
                                   child: TextField(
@@ -139,7 +126,7 @@ class _EditCompanyDialogState extends State<EditCompanyDialog> {
                             const SizedBox(height: 20),
                             Row(
                               children: [
-                                const Text("Company Email   :"),
+                                const Text("Passenger Email   :"),
                                 const SizedBox(width: 40),
                                 Expanded(
                                   child: TextField(
@@ -154,7 +141,7 @@ class _EditCompanyDialogState extends State<EditCompanyDialog> {
                             const SizedBox(height: 20),
                             Row(
                               children: [
-                                const Text("Company Number   :"),
+                                const Text("Passenger Number   :"),
                                 const SizedBox(width: 25),
                                 Expanded(
                                   child: TextField(
@@ -169,8 +156,8 @@ class _EditCompanyDialogState extends State<EditCompanyDialog> {
                             const SizedBox(height: 20),
                             Row(
                               children: [
-                                const Text("POC Number   :"),
-                                const SizedBox(width: 55),
+                                const Text("Location   :"),
+                                const SizedBox(width: 90),
                                 Expanded(
                                   child: TextField(
                                     controller: _pocController,
@@ -182,38 +169,7 @@ class _EditCompanyDialogState extends State<EditCompanyDialog> {
                               ],
                             ),
                             const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                const Text("Start Date   :"),
-                                const SizedBox(width: 70),
-                                Expanded(
-                                  child: TextField(
-                                    controller: _startController,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                const Text("End Date   :"),
-                                const SizedBox(width: 75),
-                                Expanded(
-                                  child: TextField(
-                                    controller: _endController,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
                             ElevatedButton(
-        
                               onPressed: () {
                                 _editUser();
                                 Navigator.pop(context);

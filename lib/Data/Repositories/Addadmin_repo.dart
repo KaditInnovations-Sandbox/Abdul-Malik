@@ -1,32 +1,19 @@
 import 'package:dio/dio.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 import 'package:tec_admin/Data/Models/Addadmin_model.dart';
-
 
 class AdminRepository {
   final Dio _dio = Dio();
 
-  Future<void> addAdmin(AdminModel admin) async {
+  Future<void> addAdmin(AddAdminModel admin) async {
     try {
-      const String apiUrl = 'http://localhost:8081/travelease/Admin';
-      final Map<String, dynamic> adminData = {
-        'admin_name': admin.adminName,
-        'admin_password': admin.password,
-        'admin_email': admin.email,
-        'admin_phone': admin.phoneNumber,
-        'admin_first_name': admin.firstName,
-        'admin_last_name': admin.lastName,
-      };
-      final Map<String, dynamic> requestBody = {
-        'admin': adminData,
-        'roleName': admin.rolename,
-      };
-
+      const String apiUrl = '${ApiConstants.baseUrl}/Admin';
       final Response response = await _dio.post(
         apiUrl,
-        data: requestBody,
+        data: admin.toJson(),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         return;
       } else {
         throw Exception('Error: ${response.statusCode} - ${response.statusMessage}');

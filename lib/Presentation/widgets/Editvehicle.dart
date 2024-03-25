@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 
 class EditVehicleDialog extends StatefulWidget {
   final String vehicleId;
@@ -39,7 +40,7 @@ class _EditVehicleDialogState extends State<EditVehicleDialog> {
   Future<void> _editUser() async {
     try {
       final response = await Dio().put(
-        'http://localhost:8081/travelease/Vehicle',
+        '${ApiConstants.baseUrl}/Vehicle',
         data: {
           "vehicle_id" : widget.vehicleId,
           "vehicle_capacity": _capacityController.text,

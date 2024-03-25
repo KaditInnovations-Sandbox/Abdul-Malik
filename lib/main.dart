@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Data/Repositories/Login_repo.dart';
 import 'package:tec_admin/Presentation/screens/Admin.dart';
 import 'package:tec_admin/Presentation/screens/Companypage.dart';
 import 'package:tec_admin/Presentation/screens/Driverpage.dart';
@@ -7,10 +8,7 @@ import 'package:tec_admin/Presentation/screens/Geofencing.dart';
 import 'package:tec_admin/Presentation/screens/Vehiclepage.dart';
 import 'package:tec_admin/Presentation/screens/login.dart';
 import 'package:tec_admin/Presentation/screens/mainpage.dart';
-import 'package:tec_admin/Presentation/screens/testfile.dart';
 import 'package:timezone/data/latest.dart' as tz;
-
-import 'Presentation/screens/Companypage.dart';
 
 void main() {
   tz.initializeTimeZones();
@@ -22,6 +20,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final token = UserRepository.getTokenFromLocalStorage(); // Get the token from the cookie
+    final isLoggedIn = token != null;
+
     return MaterialApp(
       title: 'TEC Admin',
       debugShowCheckedModeBanner: false,
@@ -29,10 +30,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colours.white),
         useMaterial3: true,
       ),
-      initialRoute: '/login',
+      initialRoute: isLoggedIn ? '/home' : '/login',
+
       routes: {
-        '/login': (context) => const Loginpage(),
-        '/home': (context) => const MyHomePage(),
+        '/login': (context) => isLoggedIn ? const MyHomePage() : const Loginpage(), // If already logged in, navigate to home
+        '/home': (context) => MyHomePage(),
         '/home/driver': (context) => Driver(),
         '/home/vehicle': (context) => VehilceScreen(),
         '/home/company': (context) => Company(),

@@ -2,25 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:tec_admin/Constants/Colours.dart';
-import 'package:tec_admin/Presentation/screens/Admin.dart';
 import 'package:tec_admin/Presentation/screens/Passengersdetails.dart';
-import 'package:tec_admin/Presentation/screens/Presentvehicles.dart';
 import 'package:tec_admin/Presentation/screens/Servicepage.dart';
-
-import 'package:tec_admin/Presentation/screens/Sevilaidrivers.dart';
 import 'package:tec_admin/Presentation/screens/Shedulepage.dart';
 import 'package:tec_admin/Utills/date_time_utils.dart';
 
 class CompanyDetailsPage extends StatefulWidget {
   final String companyName;
   final VoidCallback onBack;
+  final String companyid;
 
-
-
-
-  const CompanyDetailsPage({Key? key, required this.companyName, required this.onBack}) : super(key: key);
-
-
+  const CompanyDetailsPage(
+      {Key? key, required this.companyName,required this.companyid, required this.onBack})
+      : super(key: key);
 
   @override
   _CompanyDetailsPageState createState() => _CompanyDetailsPageState();
@@ -52,22 +46,21 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     super.dispose();
   }
 
-
-
-    @override
+  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-
           backgroundColor: Colours.black,
           title: Row(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(currentDate, style: const TextStyle(fontSize: 15, color: Colours.white)),
+                  Text(currentDate,
+                      style:
+                          const TextStyle(fontSize: 15, color: Colours.white)),
                   Text(
                     "${currentTime}(SGT)",
                     style: const TextStyle(fontSize: 15, color: Colours.white),
@@ -87,15 +80,23 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
           centerTitle: true,
           automaticallyImplyLeading: false, // Disable the default leading icon
           leading: IconButton(
-            icon: Icon(Icons.arrow_back,color: Colours.white,),
-            onPressed: widget.onBack, // Call the onBack callback to return to the CompanyPage
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colours.white,
+            ),
+            onPressed: widget
+                .onBack, // Call the onBack callback to return to the CompanyPage
           ),
           actions: [
             IconButton(
-                onPressed: () {
-                },
-                icon: ImageIcon(AssetImage("assets/orange.png"),color: Colours.white,)),
-            SizedBox(width: 20,)
+                onPressed: () {},
+                icon: ImageIcon(
+                  AssetImage("assets/orange.png"),
+                  color: Colours.white,
+                )),
+            SizedBox(
+              width: 20,
+            )
           ],
         ),
         body: Column(
@@ -107,7 +108,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                   child: Container(
                     width: constraints.maxWidth,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: constraints.maxWidth * 0.35),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: constraints.maxWidth * 0.35),
                       child: const TabBar(
                         indicatorSize: TabBarIndicatorSize.tab,
                         labelColor: Colours.white,
@@ -144,8 +146,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
               child: TabBarView(
                 children: [
                   Shedule(),
-                  Passengerspage(),
-                  Servicepage(),
+                  Passengerspage(companyid: widget.companyid, companyName: widget.companyName,),
+                  Servicepage(companyName: widget.companyName,),
                 ],
               ),
             ),

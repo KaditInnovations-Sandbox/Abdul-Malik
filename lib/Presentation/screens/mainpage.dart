@@ -18,16 +18,21 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  late String _userRole;
+
   final PageController _pageController = PageController();
-  final List<String> _pageNames = [
-    'Home',
-    'Route Allocation',
-    'Vehicle Details',
-    'Driver Details',
-    'Company Details',
-    'Trip Admin',
-    'Report Page'
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _userRole = _getUserRole() ?? ''; // Retrieve user role from localstorage
+  }
+
+  String? _getUserRole() {
+    return window.localStorage['user_role']; // Retrieve user role from local storage
+  }
+
+
 
   void _onPageChanged(int index) {
     setState(() {
@@ -36,7 +41,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onNavItemTapped(int index) {
-    final bool isMounted = mounted; // Store the mounted state
     setState(() {
       _selectedIndex = index;
     });
@@ -47,43 +51,34 @@ class _MyHomePageState extends State<MyHomePage> {
       curve: Curves.ease,
     );
 
-    // Check if the widget is still mounted before updating the URL
-    if (isMounted) {
-      // Update the route based on the selected index
-      String route;
-      String token = 'your_token_here'; // Replace 'your_token_here' with your actual token
-      switch (index) {
-        case 0:
-          route = '/home';
-          break;
-        case 1:
-          route = '/home/driver';
-          break;
-        case 2:
-          route = '/home/vehicle';
-          break;
-        case 3:
-          route = '/home/company';
-          break;
-        case 4:
-          route = '/home/admin';
-          break;
-        case 5:
-          route = '/home/geofencing';
-          break;
-        default:
-          route = '/home';
-      }
-
-      // Add token to the route as a query parameter
-      route = '$route?token=$token';
-
-      // Update the URL with the new route and token
-      window.history.pushState(null, 'TEC Admin', route);
+    String route = '/home';
+    switch (index) {
+      case 0:
+        route = '/home';
+        break;
+      case 1:
+        route = '/home/driver';
+        break;
+      case 2:
+        route = '/home/vehicle';
+        break;
+      case 3:
+        route = '/home/company';
+        break;
+      case 4:
+        route = '/home/admin';
+        break;
+      case 5:
+        route = '/home/geofencing';
+        break;
+      default:
+        route = '/home';
     }
+
+    route = '$route&role=$_userRole'; // Replace 'your_token_here' with your token
+
+    window.history.pushState(null, 'TEC Admin', route);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -102,18 +97,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 _buildNavItem('Home', 0),
                 _buildNavSeparator(),
-                _buildNavItem('Driver', 1),
+                if (_userRole == 'SUPER_ADMIN' || _userRole == 'TRIP_ADMIN')
+                  _buildNavItem('Driver', 1),
                 _buildNavSeparator(),
-                _buildNavItem('Vehicle', 2),
+                if (_userRole == 'SUPER_ADMIN' || _userRole == 'TRIP_ADMIN')
+                  _buildNavItem('Vehicle', 2),
                 _buildNavSeparator(),
                 _buildNavItem('Company', 3),
                 _buildNavSeparator(),
-                _buildNavItem('Admin', 4),
-                _buildNavSeparator(),
-                _buildNavItem('Geofencing', 5),
+                if (_userRole == 'SUPER_ADMIN') _buildNavItem('Admin', 4),
+                if (_userRole == 'SUPER_ADMIN')
+                  _buildNavSeparator(),
+                if (_userRole == 'SUPER_ADMIN') _buildNavItem('Geofencing', 5),
                 const Spacer(),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+
+                  },
                   icon: const Icon(Icons.logout, color: Colours.orange),
                 ),
                 const SizedBox(width: 9),
@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: PageView(
               controller: _pageController,
               onPageChanged: _onPageChanged,
-              children:  [
+              children: [
                 Homepage(),
                 Driver(),
                 VehilceScreen(),
@@ -175,17 +175,14 @@ class _MyHomePageState extends State<MyHomePage> {
             title,
             style: TextStyle(
               color: _selectedIndex == index ? Colors.white : Colours.black,
-              fontWeight: _selectedIndex == index ? FontWeight.bold : FontWeight.normal,
+              fontWeight:
+              _selectedIndex == index ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ),
       ),
     );
   }
-
-
-
-
 
   Widget _buildNavSeparator() {
     return Container(

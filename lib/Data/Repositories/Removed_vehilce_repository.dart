@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 import 'package:tec_admin/Data/Models/Removedvehicle.dart';
 
 
@@ -7,7 +8,7 @@ class RemovedVehicleRepository {
 
   Future<List<RemovedVehicle>> fetchRemovedVehicles() async {
     try {
-      final response = await _dio.get('http://localhost:8081/travelease/InactiveVehicle');
+      final response = await _dio.get('${ApiConstants.baseUrl}/InactiveVehicle');
 
       final List<RemovedVehicle> vehicles = (response.data as List<dynamic>).map((vehicleData) {
         return RemovedVehicle(

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Presentation/screens/login.dart';
 import 'package:tec_admin/Presentation/screens/testfile.dart';
 
 void main() {
   testWidgets('Login Page UI Test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MaterialApp(
-      home: LoginPage(),
+      home: Loginpage(),
     ));
 
     // Verify that the background color is Colours.orange.

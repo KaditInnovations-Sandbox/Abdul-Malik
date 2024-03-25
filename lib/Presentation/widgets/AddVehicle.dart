@@ -134,16 +134,15 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                                       }
                                     });
                                   } else {
-                                    // Platform not supported
                                     print('File picking is not supported on this platform');
                                   }
                                 },
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.cloud_upload_outlined,color: Colours.grey,),
+                                    Icon(Icons.cloud_upload_outlined,color: Colours.black,),
                                     SizedBox(width: 5,),
-                                    Text("Drop Your Files Here",style: TextStyle(color: Colours.grey),)
+                                    Text("Drop Your Files Here",style: TextStyle(color: Colours.black),)
                                   ],
                                 ),
                               ),

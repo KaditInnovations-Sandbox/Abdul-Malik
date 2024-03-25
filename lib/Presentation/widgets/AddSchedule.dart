@@ -13,15 +13,29 @@ class AddScheduleDialog extends StatefulWidget {
 class _AddScheduleDialog extends State<AddScheduleDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final VehicleRepository _repository = VehicleRepository();
 
   // Dropdown options
   List<String> vehicleNumbers = ['SPR45', 'SPR56', 'SPR67', 'SPR78', 'SPR89'];
-  List<String> vehicleCapacities = ['VAN20', 'BUS30', 'BUS40', 'BUS50', 'BUS60'];
-  List<String> driverName = ['Abdul Malik', 'Samynathan','Boopathi','Sudalaimani'];
-  List<String> routeid = ['KDTN101', 'KDTN102', 'KDTN103',];
+  List<String> vehicleCapacities = [
+    'VAN20',
+    'BUS30',
+    'BUS40',
+    'BUS50',
+    'BUS60'
+  ];
+  List<String> driverName = [
+    'Abdul Malik',
+    'Samynathan',
+    'Boopathi',
+    'Sudalaimani'
+  ];
+  List<String> routeid = [
+    'KDTN101',
+    'KDTN102',
+    'KDTN103',
+  ];
 
   String? selectedVehicleNumber;
   String? selectedVehicleCapacity;
@@ -50,7 +64,10 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                   icon: const Icon(Icons.close),
                 ),
                 Center(
-                  child: Text("Add Schdule",style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: Text(
+                    "Add Schdule",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Expanded(
@@ -84,7 +101,9 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 21,),
+                            SizedBox(
+                              height: 21,
+                            ),
                             Row(
                               children: [
                                 const Text("Route Id"),
@@ -116,7 +135,9 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 21,),
+                            SizedBox(
+                              height: 21,
+                            ),
                             Row(
                               children: [
                                 const Text("Passengers Count"),
@@ -139,7 +160,9 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 21,),
+                            SizedBox(
+                              height: 21,
+                            ),
                             Row(
                               children: [
                                 const Text("Vehicle Capacity"),
@@ -147,7 +170,8 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                                 Expanded(
                                   child: DropdownButtonFormField<String>(
                                     value: selectedVehicleCapacity,
-                                    items: vehicleCapacities.map((String value) {
+                                    items:
+                                        vehicleCapacities.map((String value) {
                                       return DropdownMenuItem<String>(
                                         value: value,
                                         child: Text(value),
@@ -171,7 +195,9 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 21,),
+                            SizedBox(
+                              height: 21,
+                            ),
                             Row(
                               children: [
                                 const Text("Vehicle Number"),
@@ -203,7 +229,9 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 21,),
+                            SizedBox(
+                              height: 21,
+                            ),
                             Row(
                               children: [
                                 const Text("Driver Name"),
@@ -244,11 +272,13 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
                               },
                               style: ElevatedButton.styleFrom(
                                 primary: Colours.orange,
-                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 40, vertical: 15),
                               ),
                               child: const Text(
                                 'Add',
-                                style: TextStyle(fontSize: 16, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white),
                               ),
                             ),
                           ],
@@ -268,7 +298,6 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
   void _submitData() async {
     try {
       final Vehicle vehicle = Vehicle(
-
         capacity: selectedVehicleCapacity!,
         number: selectedVehicleNumber!,
       );
@@ -279,7 +308,10 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
     }
   }
 
-  Widget _buildInputField({required String hintText, TextEditingController? controller, String? Function(String?)? validator}) {
+  Widget _buildInputField(
+      {required String hintText,
+      TextEditingController? controller,
+      String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
@@ -290,7 +322,8 @@ class _AddScheduleDialog extends State<AddScheduleDialog> {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(0),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         ),
         validator: validator,
       ),

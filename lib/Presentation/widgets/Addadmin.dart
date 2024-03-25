@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Data/Models/Addadmin_model.dart';
 import 'package:tec_admin/Data/Repositories/Addadmin_repo.dart';
+
+
 
 class AddAdminDialog extends StatefulWidget {
   const AddAdminDialog({Key? key}) : super(key: key);
@@ -12,126 +14,205 @@ class AddAdminDialog extends StatefulWidget {
 
 class _AddAdminDialogState extends State<AddAdminDialog> {
   final _formKey = GlobalKey<FormState>();
-  String? _selectedRole;
   final AdminRepository _adminRepository = AdminRepository();
+  late AddAdminModel _adminModel;
+  List<String> roles = ['SUPER_ADMIN', 'TRIP_ADMIN'];
+  String? _selectedRole;
 
-
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _AdminnameController = TextEditingController();
+  final TextEditingController _adminNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
       elevation: 0.0,
       backgroundColor: Colors.transparent,
-      child: SingleChildScrollView(
-        child: Center(
+      child:Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            padding: const EdgeInsets.all(20.0),
+            width: MediaQuery.of(context).size.width * 0.4,
+            height: MediaQuery.of(context).size.height * 0.8,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20.0),
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
+                ),
+                Center(
+                  child: Text("Add Admin",style: TextStyle(fontWeight: FontWeight.bold),),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: SingleChildScrollView(
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                const Text("Admin Name"),
+                                const SizedBox(width: 65),
+                                Expanded(
+                                  child: _buildInputField(
+                                    hintText: '',
+                                    controller: _adminNameController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Admin Name is required';
+                                      }
+                                      RegExp regex = RegExp(r'^[a-zA-Z]');
+                                      if (!regex.hasMatch(value)) {
+                                        return 'It Must be Alphabetical Letters';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 21,),
+                            Row(
+                              children: [
+                                const Text("Email Address"),
+                                const SizedBox(width: 52),
+                                Expanded(
+                                  child: _buildInputField(
+                                    hintText: '',
+                                    controller: _emailController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Email Address is required';
+                                      }
+                                      RegExp regex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                                      if (!regex.hasMatch(value)) {
+                                        return 'Email Format is Missing';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 21,),
+                            Row(
+                              children: [
+                                const Text("Phone Number"),
+                                const SizedBox(width: 52),
+                                Expanded(
+                                  child: _buildInputField(
+                                    hintText: '',
+                                    controller: _phoneNumberController,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Mobile Number is required';
+                                      }
+                                      RegExp regex = RegExp(r'^\d{10}$');
+                                      if (!regex.hasMatch(value)) {
+                                        return 'Enter Valid Phone Number';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 21,),
+
+                            Row(
+                              children: [
+                                const Text("Admin Type"),
+                                const SizedBox(width: 70),
+                                Expanded(
+                                  child: DropdownButtonFormField<String>(
+                                    value: _selectedRole,
+                                    items: roles.map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedRole = value;
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Admin Type is required';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 25),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  _submitData();
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Colours.orange,
+                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                              ),
+                              child: const Text(
+                                'Add',
+                                style: TextStyle(fontSize: 16, color: Colors.white),
+                              ),
+                            ),
+                            SizedBox(height: 10,),
+                            Center(
+                              child: TextButton(onPressed: (){}, child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.cloud_upload_outlined,color: Colours.grey,),
+                                  SizedBox(width: 5,),
+                                  Text("Drop Your Files Here",style: TextStyle(color: Colours.grey),)
+                                ],
+                              )),
+                            )
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                  _buildInputField(label: 'First Name', hintText: 'Enter first name', controller: _firstNameController, validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'First name is required';
-                    }
-                    return null;
-                  }),
-                  _buildInputField(label: 'Last Name', hintText: 'Enter last name', controller: _lastNameController, validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Last name is required';
-                    }
-                    return null;
-                  }),
-                  _buildInputField(label: 'Phone Number', hintText: 'Enter phone number', controller: _phoneNumberController, validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Phone number is required';
-                    }
-                    return null;
-                  }),
-                  _buildInputField(label: 'Adminname', hintText: 'Enter Adminname', controller: _AdminnameController, validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Adminname is required';
-                    }
-                    return null;
-                  }),
-                  _buildInputField(label: 'Email', hintText: 'Enter email', controller: _emailController, validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Email is required';
-                    }
-                    if (!isValidEmail(value)) {
-                      return 'Invalid email format';
-                    }
-                    return null;
-                  }),
-                  _buildInputField(label: 'Password', hintText: 'Enter password', controller: _passwordController, isObscure: true, validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password is required';
-                    }
-                    return null;
-                  }),
-                  const SizedBox(height: 10),
-                  _buildDropdown(label: 'Role', validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Role is required';
-                    }
-                    return null;
-                  }),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _submitData();
-                      }
-                    },
-                    child: const Text('Add'),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
+      ) ,
     );
   }
 
   void _submitData() async {
-    final AdminModel admin = AdminModel(
-      firstName: _firstNameController.text,
-      lastName: _lastNameController.text,
-      phoneNumber: _phoneNumberController.text,
-      adminName: _AdminnameController.text,
-      email: _emailController.text,
-      password: _passwordController.text,
-      rolename: _selectedRole.toString(),
+    _adminModel = AddAdminModel(
+      roleName: _selectedRole!,
+      admin: {
+        'admin_name': _adminNameController.text,
+        'admin_password': _passwordController.text,
+        'admin_email': _emailController.text,
+        'admin_phone': _phoneNumberController.text,
+      },
     );
 
     try {
-      await _adminRepository.addAdmin(admin);
+      await _adminRepository.addAdmin(_adminModel);
       Navigator.of(context).pop();
     } catch (e) {
       print('Error: $e');
@@ -139,38 +220,23 @@ class _AddAdminDialogState extends State<AddAdminDialog> {
     }
   }
 
-  Widget _buildInputField({required String label, required String hintText, TextEditingController? controller, bool isObscure = false, String? Function(String?)? validator}) {
+  Widget _buildInputField({required String hintText, TextEditingController? controller, String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
+      child: TextFormField(
+        controller: controller,
+        style: const TextStyle(fontSize: 14),
+        decoration: InputDecoration(
+          hintText: hintText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(0),
           ),
-          Expanded(
-            child: TextFormField(
-              controller: controller,
-              obscureText: isObscure,
-              style: const TextStyle(fontSize: 16),
-              decoration: InputDecoration(
-                hintText: hintText,
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              ),
-              validator: validator,
-            ),
-          ),
-        ],
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        ),
+        validator: validator,
       ),
     );
   }
-
   Widget _buildDropdown({required String label, String? Function(String?)? validator}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -187,6 +253,7 @@ class _AddAdminDialogState extends State<AddAdminDialog> {
           ),
           Expanded(
             child: DropdownButtonFormField<String>(
+              value: _selectedRole,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),

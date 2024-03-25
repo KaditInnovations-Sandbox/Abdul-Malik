@@ -1,9 +1,10 @@
 import 'dart:async';
+import 'dart:html';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:tec_admin/Constants/Colours.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 import 'package:tec_admin/Data/Models/Companymodel.dart';
 import 'package:tec_admin/Data/Repositories/Company_repo.dart';
 import 'package:tec_admin/Presentation/screens/Companydetails.dart';
@@ -31,26 +32,36 @@ class _CompanyState extends State<Company> {
   bool isLoading = false;
   bool showCompanyDetailsPage = false;
   late String companyName;
+  late String companyId;
   late String currentTime;
   late String currentDate;
   late Timer _timer;
   final int _rowsPerPage = 20;
   int _pageIndex = 0;
   FilterOption _selectedFilter = FilterOption.all;
+  late String _userRole;
+
+
 
   @override
   void initState() {
     super.initState();
+    _userRole = _getUserRole() ?? '';
     currentTime = DateTimeUtils.getCurrentTime();
     currentDate = DateTimeUtils.getCurrentDate();
+
     // Update date and time every second
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 0), (timer) {
       setState(() {
         currentTime = DateTimeUtils.getCurrentTime();
         currentDate = DateTimeUtils.getCurrentDate();
       });
     });
     _fetchData();
+  }
+
+  String? _getUserRole() {
+    return window.localStorage['user_role']; // Retrieve user role from local storage
   }
 
   @override
@@ -81,20 +92,18 @@ class _CompanyState extends State<Company> {
   }
 
   Future<void> _fetchData() async {
-    setState(() {
-      isLoading = true;
-    });
     try {
       final vehicles = await _repository.fetchVehicles();
+      print('Error fetching data: ');
       setState(() {
+        isLoading = false;
         _originalCompany = vehicles;
         _applyFilter(_selectedFilter);
       });
     } catch (error) {
       print('Error fetching data: $error');
-    } finally {
       setState(() {
-        isLoading = false;
+        isLoading = true;
       });
     }
   }
@@ -119,7 +128,7 @@ class _CompanyState extends State<Company> {
   Future<void> _toggleAccess(Companymodel Company) async {
     try {
       final response = await Dio().delete(
-        'http://localhost:8081/travelease/Company',
+        '${ApiConstants.baseUrl}/Company',
         data: {
           "company_name" : '${Company.Companyname}'
         },
@@ -127,6 +136,7 @@ class _CompanyState extends State<Company> {
       if (response.statusCode == 200) {
         // Handle success, such as updating UI or showing a message
         print('Company access removed successfully');
+        _refreshData();
       } else {
         // Handle error or failure response
         print('Failed to remove vehicle access');
@@ -140,7 +150,7 @@ class _CompanyState extends State<Company> {
   Future<void> _grandAccess(Companymodel Company) async {
     try {
       final response = await Dio().put(
-        'http://localhost:8081/travelease/BindCompany',
+        '${ApiConstants.baseUrl}/BindCompany',
         data: {
           "company_name" : '${Company.Companyname}'
         },
@@ -148,6 +158,7 @@ class _CompanyState extends State<Company> {
       if (response.statusCode == 200) {
         // Handle success, such as updating UI or showing a message
         print('Company access granted successfully');
+        _refreshData();
       } else {
         // Handle error or failure response
         print('Failed to grant vehicle access');
@@ -195,17 +206,19 @@ class _CompanyState extends State<Company> {
     });
   }
 
-  void _viewCompanyDetails(String companyName) {
+  void _viewCompanyDetails(String companyName,String companyId) {
     setState(() {
       showCompanyDetailsPage = true;
       this.companyName = companyName;
+      this.companyId = companyId;
+
     });
   }
 
   @override
   Widget build(BuildContext context) {
     if (showCompanyDetailsPage) {
-      return CompanyDetailsPage(companyName: companyName, onBack: _goBack);
+      return CompanyDetailsPage(companyName: companyName, onBack: _goBack, companyid: companyId,);
     } else {
       return Scaffold(
         backgroundColor: Colours.white,
@@ -238,13 +251,17 @@ class _CompanyState extends State<Company> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: () => _addCompanymodel(),
+                  icon: const Icon(Icons.add),
+                  label: const Text("Add"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colours.orange,
-                    foregroundColor: Colours.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0), // Adjust the border radius for a square button
+                    ),
+                    primary: Colours.orange,
+                    onPrimary: Colours.white,
                   ),
-                  child: const Text("Add"),
                 ),
                 const SizedBox(width: 26),
               ],
@@ -252,14 +269,7 @@ class _CompanyState extends State<Company> {
           ],
         ),
         body: isLoading
-            ? Shimmer.fromColors(
-          baseColor: Colors.grey[200]!,
-          highlightColor: Colours.Presentvehicletabletop,
-          child: Container(
-            height: 4.0, // Adjust the height of the shimmer effect
-            color: Colors.white,
-          ),
-        )
+            ? _buildErrorWidget()
             : Column(
           children: [
             Padding(
@@ -373,7 +383,7 @@ class _CompanyState extends State<Company> {
                         color: Colours.black,
                         fontSize: 11,
                       ),
-                      columns: const [
+                      columns:[
                         DataColumn(
                           label: Text(
                             'Company ID',
@@ -434,12 +444,14 @@ class _CompanyState extends State<Company> {
                             textAlign: TextAlign.center,
                           ),
                         ),
-                        DataColumn(
-                          label: Text(
-                            'Remove Access',
-                            textAlign: TextAlign.center,
+                        if(_userRole == "SUPER_ADMIN")
+                          DataColumn(
+                            label: Text(
+                              'Remove Access',
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                        ),
+
                       ],
                       rows: _filteredCompany.asMap().entries.map((entry) {
                         final int index = entry.key;
@@ -455,9 +467,16 @@ class _CompanyState extends State<Company> {
                                 textAlign: TextAlign.center,
                               ),
                             ),
-                            DataCell(TextButton(onPressed: () => _viewCompanyDetails('${Company.Companyname}'),
+                            DataCell(
+                                TextButton(
+                                    onPressed: Company.status
+                                    ?() => _viewCompanyDetails('${Company.Companyname}','${Company.Companyid}')
+                                    :null,
                                 child: Text("${Company.Companyname}",
-                                  style: const TextStyle(color: Colours.orange, fontSize: 12),
+                                  style: TextStyle(
+                                      color: Company.status ? Colours.orange : Colours.black,
+                                      fontSize: 12
+                                  ),
                                   textAlign: TextAlign.center,))),
                             DataCell(
                               Text(Company.Companyemail, textAlign: TextAlign.center,),
@@ -510,23 +529,25 @@ class _CompanyState extends State<Company> {
                                 ),
                               ),
                             ),
-                            DataCell(
-                              IconButton(
-                                onPressed: () {
-                                  if (Company.status) {
-                                    _toggleAccess(Company);
-                                  } else {
-                                    _grandAccess(Company);
-                                  }
-                                },
-                                icon: Icon(
-                                  Company.status
-                                      ? Icons.remove_circle_outline
-                                      : Icons.add_circle_outline,
-                                  color: Colours.orange,
+                            if(_userRole == "SUPER_ADMIN")
+                              DataCell(
+                                IconButton(
+                                  onPressed: () {
+                                    if (Company.status) {
+                                      _toggleAccess(Company);
+                                    } else {
+                                      _grandAccess(Company);
+                                    }
+                                  },
+                                  icon: Icon(
+                                    Company.status
+                                        ? Icons.remove_circle_outline
+                                        : Icons.add_circle_outline,
+                                    color: Colours.orange,
+                                  ),
                                 ),
                               ),
-                            ),
+
                           ],
                         );
                       }).toList(),
@@ -539,5 +560,30 @@ class _CompanyState extends State<Company> {
         ),
       );
     }
+  }
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/error.png', // Replace 'error_image.png' with your error illustration image path
+            height: 200,
+            width: 200,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Oops! Something went wrong.',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _refreshData, // Call your refresh data method
+            child: Text('Try Again'),
+          ),
+        ],
+      ),
+    );
   }
 }

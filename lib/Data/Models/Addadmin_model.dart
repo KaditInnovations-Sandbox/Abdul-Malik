@@ -1,19 +1,16 @@
-class AdminModel {
-  final String firstName;
-  final String lastName;
-  final String phoneNumber;
-  final String adminName;
-  final String email;
-  final String password;
-  final String rolename;
+class AddAdminModel {
+  final String roleName;
+  final Map<String, dynamic> admin;
 
-  AdminModel({
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    required this.adminName,
-    required this.email,
-    required this.password,
-    required this.rolename,
+  AddAdminModel({
+    required this.roleName,
+    required this.admin,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'roleName': roleName,
+      'admin': admin,
+    };
+  }
 }

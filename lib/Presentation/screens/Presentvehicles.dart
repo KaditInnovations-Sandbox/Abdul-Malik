@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Data/Models/Presentvehicle.dart';
 import 'package:tec_admin/Data/Repositories/Present_vehcile_repositories.dart';
-import 'package:tec_admin/Presentation/widgets/AddVehicle.dart';
 import 'package:tec_admin/Presentation/widgets/Editvehicle.dart';
 
 import 'package:dio/dio.dart';
@@ -23,8 +21,6 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
   bool isLoading = false;
   late String currentTime;
   late String currentDate;
-  final bool _isSelectedAll = false;
-  final List<PresentVehicle> _selectedRows = [];
   late Timer _timer;
   final int _rowsPerPage = 10;
   int _pageIndex = 0;
@@ -66,6 +62,7 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
     final now = DateTime.now();
     currentDate = DateFormat('MMM dd, yyyy').format(now);
   }
+
   Future<void> _fetchData() async {
     setState(() {
       isLoading = true;
@@ -100,8 +97,6 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
     return (_vehicles.length / _rowsPerPage).ceil();
   }
 
-
-
   void _editVehicle(PresentVehicle vehicle) {
     showDialog(
       context: context,
@@ -118,7 +113,7 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
   void _toggleAccess(PresentVehicle vehicle) async {
     try {
       final response = await Dio().delete(
-        'http://localhost:8081/travelease/Vehicle',
+        'http://l192.168.20.21:8081/travelease/Vehicle',
         data: vehicle.vehiclenumber,
       );
       if (response.statusCode == 200) {
@@ -142,17 +137,16 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
 
   List<PresentVehicle> _searchVehicles(String query) {
     return _vehicles.where((vehicle) {
-      return vehicle.vehiclecapacity.toLowerCase().contains(query.toLowerCase()) ||
+      return vehicle.vehiclecapacity
+              .toLowerCase()
+              .contains(query.toLowerCase()) ||
           vehicle.vehiclenumber.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
 
-
   Future<void> _refreshData() async {
     _fetchData();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,215 +154,227 @@ class _VehicleManagementPageState extends State<PresentVehicleScreen> {
       backgroundColor: Colors.white,
       body: isLoading
           ? LinearProgressIndicator(
-        backgroundColor: Colors.grey[200],
-        valueColor: const AlwaysStoppedAnimation<Color>(Colours.Presentvehicletabletop),
-      )
+              backgroundColor: Colors.grey[200],
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  Colours.Presentvehicletabletop),
+            )
           : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: Container(
-              color: Colors.white,
-              child: Row(
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        _refreshData();
-                      },
-                      icon: const Icon(Icons.refresh)),
-                  SizedBox(
-                    width: 600,
-                    height: 50,
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: "Enter Vehicle Capacity,Vehicle Number",
-                        hintStyle: const TextStyle(color: Colors.grey),
-                        fillColor: Colors.grey.withOpacity(0.5),
-                        filled: true,
-                        suffixIcon: IconButton(
-                            onPressed: () {
-                              _searchVehicles(_searchController.text);
-                            },
-                            icon: const Icon(Icons.search_rounded)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(40),
-                          borderSide: const BorderSide(
-                            color: Colors.transparent,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios),
-                        onPressed: _pageIndex == 0 ? null : _onPreviousPage,
-                      ),
-                      Text('${_pageIndex + 1} of ${_calculateTotalPages()}'),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios),
-                        onPressed: _pageIndex == (_calculateTotalPages() - 1)
-                            ? null
-                            : _onNextPage,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 15,
-                  )
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
                   child: Container(
                     color: Colors.white,
-                    padding: const EdgeInsets.all(20.0),
-                    child: DataTable(
-                      columnSpacing: 5.0,
-                      headingRowColor: MaterialStateProperty.resolveWith(
-                              (states) => Colours.Presentvehicletabletop),
-                      headingTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12, // Adjust heading font size
-                      ),
-                      headingRowHeight: 50.0,
-                      dataRowHeight: 50.0,
-                      dividerThickness: 0,
-                      dataTextStyle: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 11,
-                      ),
-                      columns: const [
-                        DataColumn(
-                          label: Text(
-                            'Vehicle ID',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Vehicle Capacity',
-                            textAlign: TextAlign.center, // Center align the heading
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Vehicle Number',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Status',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Created at',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Edit',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        DataColumn(
-                          label: Text(
-                            'Remove Access',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                      rows: _vehicles
-                          .skip(_pageIndex * _rowsPerPage)
-                          .take(_rowsPerPage)
-                          .toList()
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                        final int index = entry.key + (_pageIndex * _rowsPerPage);
-                        final PresentVehicle vehicle = entry.value;
-                        final Color color = index.isOdd ? Colors.grey[300]! : Colors.grey[100]!;
-                        return DataRow(
-                          // selected: _selectedRows.contains(user),
-                          // onSelectChanged: (isSelected) {
-                          //   setState(() {
-                          //     if (isSelected ?? false) {
-                          //       _selectedRows.add(user);
-                          //     } else {
-                          //       _selectedRows.remove(user);
-                          //     }
-                          //   });
-                          // },
-                          color: MaterialStateProperty.all(color),
-                          cells: [
-                            DataCell(
-                              Text(
-                                vehicle.vehicleid,
-                                textAlign: TextAlign.center,
+                    child: Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              _refreshData();
+                            },
+                            icon: const Icon(Icons.refresh)),
+                        SizedBox(
+                          width: 600,
+                          height: 50,
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: "Enter Vehicle Capacity,Vehicle Number",
+                              hintStyle: const TextStyle(color: Colors.grey),
+                              fillColor: Colors.grey.withOpacity(0.5),
+                              filled: true,
+                              suffixIcon: IconButton(
+                                  onPressed: () {
+                                    _searchVehicles(_searchController.text);
+                                  },
+                                  icon: const Icon(Icons.search_rounded)),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(40),
+                                borderSide: const BorderSide(
+                                  color: Colors.transparent,
+                                ),
                               ),
                             ),
-                            DataCell(
-                              Text(vehicle.vehiclecapacity),
+                          ),
+                        ),
+                        const Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back_ios),
+                              onPressed:
+                                  _pageIndex == 0 ? null : _onPreviousPage,
                             ),
-                            DataCell(
-                              Text(
-                                vehicle.vehiclenumber,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                vehicle.status ? 'Active' : 'Inactive',
-                                textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: vehicle.status ? Colors.green : Colors.red,
-                                  )
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                DateFormat('MMM dd, yyyy').format(DateTime.parse(vehicle.registered)),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            DataCell(
-                              IconButton(
-                                onPressed: () => _editVehicle(vehicle),
-                                icon: const Icon(Icons.edit, color: Colours.Presentvehiclebutton),
-                              ),
-                            ),
-                            DataCell(
-                              IconButton(
-                                onPressed: () => _toggleAccess(vehicle),
-                                icon: const Icon(Icons.remove_circle_outline, color: Colours.Presentvehiclebutton),
-                              ),
+                            Text(
+                                '${_pageIndex + 1} of ${_calculateTotalPages()}'),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_forward_ios),
+                              onPressed:
+                                  _pageIndex == (_calculateTotalPages() - 1)
+                                      ? null
+                                      : _onNextPage,
                             ),
                           ],
-                        );
-                      }).toList(),
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        )
+                      ],
                     ),
                   ),
                 ),
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(20.0),
+                          child: DataTable(
+                            columnSpacing: 5.0,
+                            headingRowColor: MaterialStateProperty.resolveWith(
+                                (states) => Colours.Presentvehicletabletop),
+                            headingTextStyle: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12, // Adjust heading font size
+                            ),
+                            headingRowHeight: 50.0,
+                            dataRowHeight: 50.0,
+                            dividerThickness: 0,
+                            dataTextStyle: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 11,
+                            ),
+                            columns: const [
+                              DataColumn(
+                                label: Text(
+                                  'Vehicle ID',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Vehicle Capacity',
+                                  textAlign: TextAlign
+                                      .center, // Center align the heading
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Vehicle Number',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Status',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Created at',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Edit',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Remove Access',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                            rows: _vehicles
+                                .skip(_pageIndex * _rowsPerPage)
+                                .take(_rowsPerPage)
+                                .toList()
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                              final int index =
+                                  entry.key + (_pageIndex * _rowsPerPage);
+                              final PresentVehicle vehicle = entry.value;
+                              final Color color = index.isOdd
+                                  ? Colors.grey[300]!
+                                  : Colors.grey[100]!;
+                              return DataRow(
+                                // selected: _selectedRows.contains(user),
+                                // onSelectChanged: (isSelected) {
+                                //   setState(() {
+                                //     if (isSelected ?? false) {
+                                //       _selectedRows.add(user);
+                                //     } else {
+                                //       _selectedRows.remove(user);
+                                //     }
+                                //   });
+                                // },
+                                color: MaterialStateProperty.all(color),
+                                cells: [
+                                  DataCell(
+                                    Text(
+                                      vehicle.vehicleid,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(vehicle.vehiclecapacity),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      vehicle.vehiclenumber,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(vehicle.status ? 'Active' : 'Inactive',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: vehicle.status
+                                              ? Colors.green
+                                              : Colors.red,
+                                        )),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      DateFormat('MMM dd, yyyy').format(
+                                          DateTime.parse(vehicle.registered)),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  DataCell(
+                                    IconButton(
+                                      onPressed: () => _editVehicle(vehicle),
+                                      icon: const Icon(Icons.edit,
+                                          color: Colours.Presentvehiclebutton),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    IconButton(
+                                      onPressed: () => _toggleAccess(vehicle),
+                                      icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                          color: Colours.Presentvehiclebutton),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

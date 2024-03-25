@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
+import 'package:shimmer/shimmer.dart';
 import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Utills/date_time_utils.dart';
 
@@ -81,61 +82,61 @@ class _GeofencingState extends State<Geofencing> {
         automaticallyImplyLeading: false,
         centerTitle: false,
       ),
-      // body: Stack(
-      //   children: [
-      //     FlutterMap(
-      //       options: MapOptions(
-      //         center: LatLng(1.3521, 103.8198), // Initial map center
-      //         zoom: 15.0, // Initial zoom level
-      //         onTap: (tapPosition, latLng) {
-      //           if (_drawingEnabled) _handleTap(latLng);
-      //         },
-      //       ),
-      //       children: [
-      //         TileLayer(
-      //           urlTemplate:
-      //           'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
-      //           additionalOptions: {
-      //             'accessToken':
-      //             'pk.eyJ1IjoiYWJkdWxtYWxpazAyIiwiYSI6ImNsc3k5NndzNzBhbHcyam9ldzMweHp1ZXgifQ.8OJRRvY-p357uGyu6lxheQ',
-      //             'id': 'mapbox/dark-v10', // Map style
-      //           },
-      //         ),
-      //         for (int i = 0; i < _polygons.length; i++)
-      //           PolygonLayer(
-      //             polygons: [
-      //               Polygon(
-      //                 points: _polygons[i],
-      //                 color: _polygonColors[i % _polygonColors.length],
-      //                 borderStrokeWidth: 2,
-      //                 borderColor:
-      //                 _polygonColors[i % _polygonColors.length],
-      //               ),
-      //             ],
-      //           ),
-      //       ],
-      //     ),
-      //     Positioned(
-      //       top: 10,
-      //       left: 10,
-      //       bottom: 10,
-      //       width: 400,
-      //       child: Container(
-      //         color: Colours.black,
-      //         child: ListView.builder(
-      //           itemCount: _savedPolygons.length,
-      //           itemBuilder: (context, index) {
-      //             return PlaceNameExpansionTile(
-      //               polygons: _savedPolygons[index],
-      //               placeNamesCache: _placeNamesCache,
-      //               polygonIndex: index + 1,
-      //             );
-      //           },
-      //         ),
-      //       ),
-      //     ),
-      //   ],
-      // ),
+      body: Stack(
+        children: [
+          FlutterMap(
+            options: MapOptions(
+              center: LatLng(1.3521, 103.8198), // Initial map center
+              zoom: 15.0, // Initial zoom level
+              onTap: (tapPosition, latLng) {
+                if (_drawingEnabled) _handleTap(latLng);
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}',
+                additionalOptions: {
+                  'accessToken':
+                  'pk.eyJ1IjoiYWJkdWxtYWxpazAyIiwiYSI6ImNsc3k5NndzNzBhbHcyam9ldzMweHp1ZXgifQ.8OJRRvY-p357uGyu6lxheQ',
+                  'id': 'mapbox/dark-v10', // Map style
+                },
+              ),
+              for (int i = 0; i < _polygons.length; i++)
+                PolygonLayer(
+                  polygons: [
+                    Polygon(
+                      points: _polygons[i],
+                      color: _polygonColors[i % _polygonColors.length],
+                      borderStrokeWidth: 2,
+                      borderColor:
+                      _polygonColors[i % _polygonColors.length],
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          Positioned(
+            top: 10,
+            left: 10,
+            bottom: 10,
+            width: 400,
+            child: Container(
+              color: Colours.black,
+              child: ListView.builder(
+                itemCount: _savedPolygons.length,
+                itemBuilder: (context, index) {
+                  return PlaceNameExpansionTile(
+                    polygons: _savedPolygons[index],
+                    placeNamesCache: _placeNamesCache,
+                    polygonIndex: index + 1,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -254,7 +255,17 @@ class _PlaceNameExpansionTileState extends State<PlaceNameExpansionTile> {
       future: _placeNamesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return  Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colours.orange,
+            child: ListTile(
+              title: Container(
+                width: double.infinity,
+                height: 16.0,
+                color: Colors.white, // Placeholder color
+              ),
+            ),
+          );
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {

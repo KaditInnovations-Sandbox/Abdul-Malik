@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 import 'package:tec_admin/Data/Models/Companymodel.dart';
 
 class CompanyRepository {
   Future<List<Companymodel>> fetchVehicles() async {
     try {
-      final response = await Dio().get('http://localhost:8081/travelease/Company');
+      final response = await Dio().get('${ApiConstants.baseUrl}/Company');
       List<Companymodel> company = (response.data as List<dynamic>).map((companyData) {
         return Companymodel(
           Companyid: companyData['company_id'].toString(),
@@ -29,15 +30,4 @@ class CompanyRepository {
       return [];
     }
   }
-
-  // Future<void> removeVehicleAccess(String vehicleNumber) async {
-  //   try {
-  //     await Dio().delete(
-  //       'http://localhost:8081/travelease/Vehicle',
-  //       data: vehicleNumber,
-  //     );
-  //   } catch (error) {
-  //     print('Error removing vehicle access: $error');
-  //   }
-  // }
 }

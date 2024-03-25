@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:tec_admin/Constants/Colours.dart';
 import 'package:tec_admin/Data/Models/Loginmodel.dart';
 import 'package:tec_admin/Data/Repositories/Login_repo.dart';
@@ -17,29 +18,55 @@ class _LoginpageState extends State<Loginpage> {
   final UserRepository loginRepository = UserRepository();
   bool isPasswordVisible = false;
   bool rememberMe = false;
+  String errorMessage = '';
 
-  bool isEmail(String input) {
-    final emailRegex =
-    RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    return emailRegex.hasMatch(input);
+  void _clearErrorMessage() {
+    setState(() {
+      errorMessage = '';
+    });
   }
 
-  bool isPhoneNumber(String input) {
-    final phoneNumberRegex = RegExp(r'^\d{10}$');
-    return phoneNumberRegex.hasMatch(input);
+  bool _isValidEmail(String email) {
+    final emailRegex =
+    RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return emailRegex.hasMatch(email);
   }
 
   Future<void> _login() async {
     final String email = usernameController.text;
     final String password = passwordController.text;
 
+    if (email.isEmpty || password.isEmpty) {
+      Fluttertoast.showToast(
+        msg: 'Please fill in all fields',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+      return;
+    }
+
+    if (!_isValidEmail(email)) {
+      Fluttertoast.showToast(
+        msg: 'Please enter a valid email address',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
+      return;
+    }
+
     final UserModel user = UserModel(username: email, password: password);
     final bool success = await UserRepository().login(user);
 
     if (success) {
-      Navigator.pushNamed(context, '/home');
+      final token = UserRepository.getTokenFromLocalStorage();
+      print('Token retrieved from Local Storage: $token');
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      print('Login failed');
+      Fluttertoast.showToast(
+        msg: 'Login failed',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+      );
     }
   }
 
@@ -49,6 +76,7 @@ class _LoginpageState extends State<Loginpage> {
       backgroundColor: Colours.orange,
       body: Stack(
         children: [
+
           Positioned(
             width: MediaQuery.of(context).size.width * 1,
             height: MediaQuery.of(context).size.height * 1.4,
@@ -63,14 +91,43 @@ class _LoginpageState extends State<Loginpage> {
               fit: BoxFit.fill,
             ),
           ),
+          Positioned(
+            left: MediaQuery.of(context).size.width * 0.3563,
+            top: MediaQuery.of(context).size.height * 0.686,
+            child: Transform.rotate(
+              angle: 40 * (3.14159 / 180),
+              child: ClipPath(
+                clipper: TriangleClipper(),
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  color: Colours.orange,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: MediaQuery.of(context).size.width * 0.6155,
+            top: MediaQuery.of(context).size.height * 0.686,
+            child: Transform.rotate(
+              angle: -40 * (3.14159 / 180),
+              child: ClipPath(
+                clipper: TriangleClipper(),
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  color: Colours.orange,
+                ),
+              ),
+            ),
+          ),
           Center(
             child: Container(
               decoration: BoxDecoration(
-                color: Colours.white.withOpacity(0.9), // Adjust the opacity of the white background
-
+                color: Colours.white.withOpacity(0.7),
               ),
               width: MediaQuery.of(context).size.width * 0.28,
-              height: MediaQuery.of(context).size.height * 0.55,
+              height: MediaQuery.of(context).size.height * 0.6,
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: SingleChildScrollView(
@@ -88,6 +145,7 @@ class _LoginpageState extends State<Loginpage> {
                       TextField(
                         controller: usernameController,
                         onEditingComplete: _login,
+                        onChanged: (_) => _clearErrorMessage(),
                         decoration: InputDecoration(
                           hintText: "Username",
                           fillColor: Colors.grey.shade300,
@@ -114,6 +172,7 @@ class _LoginpageState extends State<Loginpage> {
                         controller: passwordController,
                         obscureText: !isPasswordVisible,
                         onEditingComplete: _login,
+                        onChanged: (_) => _clearErrorMessage(),
                         decoration: InputDecoration(
                           fillColor: Colors.grey.shade300,
                           hintText: "Password",
@@ -141,7 +200,6 @@ class _LoginpageState extends State<Loginpage> {
                               color: Colors.black,
                             ),
                             onPressed: () {
-                              // Toggle password visibility
                               setState(() {
                                 isPasswordVisible = !isPasswordVisible;
                               });
@@ -183,22 +241,28 @@ class _LoginpageState extends State<Loginpage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 15),
-                      Stack(
-                        children: [
-
-                          Center(
-                            child: TextButton(
-                              onPressed: _login,
-                              child: Text(
-                                "Login",
-                                style: TextStyle(color: Colours.black, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          )
-                        ],
-                      )
                     ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: MediaQuery.of(context).size.width * 0.35,
+            top: MediaQuery.of(context).size.height * 0.65,
+            child: Material(
+              elevation: 4, // elevation for the login button
+              child: Container(
+                height: 50,
+                width: MediaQuery.of(context).size.width * 0.3,
+                decoration: BoxDecoration(
+                  color: Colours.orange,
+                ),
+                child: TextButton(
+                  onPressed: _login,
+                  child: Text(
+                    "Login",
+                    style: TextStyle(color: Colours.white, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -207,5 +271,22 @@ class _LoginpageState extends State<Loginpage> {
         ],
       ),
     );
+  }
+}
+
+class TriangleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(size.width / 2, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
   }
 }

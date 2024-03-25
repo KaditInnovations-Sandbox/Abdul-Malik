@@ -1,6 +1,5 @@
-// lib/data/repositories/vehicle_repository.dart
-
 import 'package:dio/dio.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 import 'package:tec_admin/Data/Models/AddVehicle.dart';
 
 
@@ -9,7 +8,7 @@ class VehicleRepository {
 
   Future<void> addVehicle(Vehicle vehicle) async {
     try {
-      const String apiUrl = 'http://localhost:8081/travelease/Vehicle';
+      const String apiUrl = '${ApiConstants.baseUrl}/Vehicle';
       final Map<String, dynamic> data = {
         'vehicle_capacity': vehicle.capacity,
         'vehicle_number': vehicle.number,

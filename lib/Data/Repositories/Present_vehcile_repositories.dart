@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:tec_admin/Constants/api_constants.dart';
 import 'package:tec_admin/Data/Models/Presentvehicle.dart';
 
 class PresentVehicleRepository {
   Future<List<PresentVehicle>> fetchVehicles() async {
     try {
-      final response = await Dio().get('http://localhost:8081/travelease/Vehicle');
+      final response = await Dio().get('${ApiConstants.baseUrl}/Vehicle');
       List<PresentVehicle> vehicles = (response.data as List<dynamic>).map((vehicleData) {
         return PresentVehicle(
           vehicleid: vehicleData['vehicle_id'].toString(),
